@@ -27,7 +27,7 @@ class ExceptionFilter[F[_]: Sync](om: FinatraObjectMapper) extends Filter[F] {
           s" [line: ${loc.getLineNr}, column: ${loc.getColumnNr}]"
         }
         e.clearLocation()
-        respond(Status.BadRequest, Seq(e.getMessage + loc))
+        respond(Status.BadRequest, Seq(e.getMessage + loc.getOrElse("")))
 
 
       case e: Throwable =>

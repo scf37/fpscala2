@@ -6,6 +6,8 @@ import me.scf37.fpscala2.config.ApplicationConfig
 import me.scf37.fpscala2.config.DbConfig
 import me.scf37.fpscala2.config.JsonConfig
 import me.scf37.fpscala2.config.ServerConfig
+import me.scf37.fpscala2.db.sql.SqlDb
+
 
 
 object Main {
@@ -28,7 +30,8 @@ object Main {
       )
     )
 
-    val app = new Application[Eval, IO](config)
+    import me.scf37.fpscala2.db.sql._
+    val app = new Application[Eval, IO, SqlDb[IO, ?]](config)
 
     val server = app.serverModule.server.value
 

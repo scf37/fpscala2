@@ -8,11 +8,11 @@ import cats.effect.Sync
 package object sql {
  type SqlDb[F[_], A] = Kleisli[F, Connection, A]
 
-  implicit def db[F[_]: Sync]: Db[SqlDb[F, ?]] = new Db[SqlDb[F, ?]] {
-    override def eval[T](f: Connection => T): SqlDb[F, T] = Kleisli.apply(c => Sync[F].delay(f(c)))
+  implicit def db[F[_]: Sync]: Db[SqlDb[F, ?], F] = new Db[SqlDb[F, ?], F] {
+    override def lift[A](f: Connection => F[A]): SqlDb[F, A] = Kleisli.apply(f)
   }
-}
 
-package object sql2 {
-  case class SqlDb[F[_], A](f: Connection => F[A])
+  implicit def dbEval[F[_]: Sync]: DbEval[SqlDb[F, ?], F] = new DbEval[SqlDb[F, ?], F] {
+    override def eval[A](f: SqlDb[F, A], c: Connection): F[A] = f(c)
+  }
 }

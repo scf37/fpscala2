@@ -4,15 +4,15 @@ import java.sql.Connection
 
 
 /**
-  * Typeclass for database effect.
+  * Typeclass for lifting JDBC code into database effect.
   *
-  * Lifts JDBC code using provided Connection to F
+  * Database effect required java.sql.Connection instance for evaluation.
   */
-trait Db[F[_]] {
-  def eval[T](f: Connection => T): F[T]
+trait Db[DbEffect[_], F[_]] {
+  def lift[A](f: Connection => F[A]): DbEffect[A]
 }
 
 object Db {
-  def apply[F[_]: Db] = implicitly[Db[F]]
+  def apply[DbEffect[_], F[_]](implicit db: Db[F, DbEffect]): Db[F, DbEffect] = db
 }
 

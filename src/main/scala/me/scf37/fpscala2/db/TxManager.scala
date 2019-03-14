@@ -6,8 +6,8 @@ import cats.~>
   * Convert database effect to generic effect
   *
   * @tparam F generic effect
-  * @tparam T database effect
+  * @tparam DbEffect database effect
   */
-trait TxManager[F[_], T[_]] {
-  def tx: T ~> F
+trait TxManager[F[_], DbEffect[_]] {
+  def tx: DbEffect ~> F
 }

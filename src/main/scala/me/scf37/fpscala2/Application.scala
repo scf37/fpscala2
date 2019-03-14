@@ -1,8 +1,8 @@
 package me.scf37.fpscala2
 
 import cats.Monad
-import cats.effect.Async
 import cats.effect.Effect
+import cats.effect.Sync
 import me.scf37.fpscala2.config.ApplicationConfig
 import me.scf37.fpscala2.config.Later
 import me.scf37.fpscala2.config.module.CommonModule
@@ -19,39 +19,26 @@ import me.scf37.fpscala2.config.module.ServiceModule
 import me.scf37.fpscala2.config.module.ServiceModuleImpl
 import me.scf37.fpscala2.config.module.WebModule
 import me.scf37.fpscala2.config.module.WebModuleImpl
-import me.scf37.fpscala2.db.sql.SqlDb
+import me.scf37.fpscala2.db.Db
+import me.scf37.fpscala2.db.DbEval
 
-
-class ApplicationBackend[I[_]: Later: Monad, F[_]: Async](config: ApplicationConfig) {
-  import me.scf37.fpscala2.db.sql.db
-
-  type SqlDbF[A] = SqlDb[F, A]
-
-  lazy val commonModule: CommonModule[F, I] = new CommonModuleImpl[F, I](config.json)
-
-  lazy val dbModule: DbModule[F, SqlDbF, I] = new DbModuleImpl[F, I](config.db)
-
-  lazy val daoModule: DaoModule[SqlDbF, I] = new DaoModuleImpl[SqlDbF, I]
-
-  lazy val serviceModule: ServiceModule[SqlDbF, I] = new ServiceModuleImpl[SqlDbF, I](daoModule)
-
-  lazy val controllerModule: ControllerModule[F, I] = new ControllerModuleImpl[F, SqlDbF, I](serviceModule, dbModule)
-}
-
-class Application[I[_]: Later: Monad, F[_]: Effect](config: ApplicationConfig) {
-  import me.scf37.fpscala2.db.sql.db
-  
-  type SqlDbF[A] = SqlDb[F, A]
+class Application[I[_]: Later: Monad, F[_]: Effect, DbEffect[_]: Sync](
+  config: ApplicationConfig
+)(
+  implicit
+  DB: Db[DbEffect, F],
+  DE: DbEval[DbEffect, F]
+) {
 
   lazy val commonModule: CommonModule[F, I] = new CommonModuleImpl[F, I](config.json)
 
-  lazy val dbModule: DbModule[F, SqlDbF, I] = new DbModuleImpl[F, I](config.db)
+  lazy val dbModule: DbModule[F, DbEffect, I] = new DbModuleImpl[F, DbEffect, I](config.db)
 
-  lazy val daoModule: DaoModule[SqlDbF, I] = new DaoModuleImpl[SqlDbF, I]
+  lazy val daoModule: DaoModule[DbEffect, I] = new DaoModuleImpl[DbEffect, F, I]
 
-  lazy val serviceModule: ServiceModule[SqlDbF, I] = new ServiceModuleImpl[SqlDbF, I](daoModule)
+  lazy val serviceModule: ServiceModule[DbEffect, I] = new ServiceModuleImpl[DbEffect, I](daoModule)
 
-  lazy val controllerModule: ControllerModule[F, I] = new ControllerModuleImpl[F, SqlDbF, I](serviceModule, dbModule)
+  lazy val controllerModule: ControllerModule[F, I] = new ControllerModuleImpl[F, DbEffect, I](serviceModule, dbModule)
 
   lazy val webModule: WebModule[F, I] = new WebModuleImpl[F, I](controllerModule, commonModule)
 

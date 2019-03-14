@@ -1,18 +1,21 @@
 package me.scf37.fpscala2.config.module
 
 import cats.Monad
+import cats.effect.Sync
 import me.scf37.fpscala2.config.Later
 import me.scf37.fpscala2.dao.TodoDao
 import me.scf37.fpscala2.dao.sql.TodoDaoSql
 import me.scf37.fpscala2.db.Db
 
-trait DaoModule[F[_], I[_]] {
-  def todoDao: I[TodoDao[F]]
+trait DaoModule[DbEffect[_], I[_]] {
+  def todoDao: I[TodoDao[DbEffect]]
 }
 
-class DaoModuleImpl[F[_]: Db: Monad, I[_]: Later: Monad] extends DaoModule[F, I] {
+class DaoModuleImpl[DbEffect[_]: Monad, F[_]: Sync, I[_]: Later: Monad](
+  implicit DB: Db[DbEffect, F]
+) extends DaoModule[DbEffect, I] {
 
-  override lazy val todoDao: I[TodoDao[F]] = Later[I].later {
-    new TodoDaoSql[F]
+  override lazy val todoDao: I[TodoDao[DbEffect]] = Later[I].later {
+    new TodoDaoSql[DbEffect, F]
   }
 }

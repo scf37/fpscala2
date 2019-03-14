@@ -18,22 +18,26 @@ import org.apache.commons.dbcp2.PoolableConnectionFactory
 import org.apache.commons.dbcp2.PoolingDataSource
 import org.apache.commons.pool2.impl.GenericObjectPool
 import cats.implicits._
+import me.scf37.fpscala2.db.DbEval
 import org.flywaydb.core.Flyway
 
 import scala.concurrent.ExecutionContext
 
-trait DbModule[F[_], T[_], I[_]] {
-  def tx: I[TxManager[F, T]]
+trait DbModule[F[_], DbEffect[_], I[_]] {
+  def tx: I[TxManager[F, DbEffect]]
 }
 
-class DbModuleImpl[F[_]: Async, I[_]: Later: Monad](config: DbConfig) extends DbModule[F, SqlDb[F, ?], I] {
+class DbModuleImpl[F[_]: Async, DbEffect[_], I[_]: Later: Monad](
+  config: DbConfig
+)(implicit DE: DbEval[DbEffect, F]
+) extends DbModule[F, DbEffect, I] {
 
-  override lazy val tx: I[TxManager[F, SqlDb[F, ?]]] = for {
+  override lazy val tx: I[TxManager[F, DbEffect]] = for {
     _ <- flyway
     pool <- jdbcPool
     dataSource <- dataSource
   } yield  {
-    new SqlTxManager[F](dataSource, pool)
+    new SqlTxManager[F, DbEffect](dataSource, pool)
   }
 
   private lazy val jdbcPool: I[ContextShift[F]] = Later[I].later {

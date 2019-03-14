@@ -1,17 +1,14 @@
 package me.scf37.fpscala2.db.sql
 
 import java.sql.Connection
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.atomic.AtomicInteger
 
 import cats.arrow.FunctionK
-import cats.effect.Async
 import cats.effect.ContextShift
 import cats.effect.Sync
 import cats.implicits._
 import cats.~>
 import javax.sql.DataSource
+import me.scf37.fpscala2.db.DbEval
 import me.scf37.fpscala2.db.TxManager
 
 import scala.util.Try
@@ -25,13 +22,17 @@ import scala.util.Try
   * @param poolSize maximum number of parallel transactions
   * @tparam F generic effect
   */
-class SqlTxManager[F[_]: Sync](ds: DataSource, jdbcPool: ContextShift[F]) extends TxManager[F, SqlDb[F, ?]] {
+class SqlTxManager[F[_]: Sync, DbEffect[_]](
+  ds: DataSource, jdbcPool: ContextShift[F]
+)(
+  implicit DE: DbEval[DbEffect, F]
+) extends TxManager[F, DbEffect] {
 
-  override def tx: SqlDb[F, ?] ~> F = FunctionK.lift(doTx)
+  override def tx: DbEffect ~> F = FunctionK.lift(doTx)
 
-  private def doTx[A](t: SqlDb[F, A]): F[A] = for {
+  private def doTx[A](t: DbEffect[A]): F[A] = for {
     _ <- jdbcPool.shift
-    r <- inTransaction(t.apply)
+    r <- inTransaction(c => DE.eval(t, c))
   } yield r
 
   private def inTransaction[T](f: Connection => F[T]): F[T] =
