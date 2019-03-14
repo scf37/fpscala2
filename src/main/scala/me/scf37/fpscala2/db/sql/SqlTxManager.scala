@@ -7,6 +7,9 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import cats.arrow.FunctionK
 import cats.effect.Async
+import cats.effect.ContextShift
+import cats.effect.Sync
+import cats.implicits._
 import cats.~>
 import javax.sql.DataSource
 import me.scf37.fpscala2.db.TxManager
@@ -22,47 +25,32 @@ import scala.util.Try
   * @param poolSize maximum number of parallel transactions
   * @tparam F generic effect
   */
-class SqlTxManager[F[_]: Async](ds: DataSource, poolSize: Int) extends TxManager[F, SqlDb] {
+class SqlTxManager[F[_]: Sync](ds: DataSource, jdbcPool: ContextShift[F]) extends TxManager[F, SqlDb[F, ?]] {
 
-  private val jdbcPool = Executors.newFixedThreadPool(poolSize, new ThreadFactory {
-    private val id = new AtomicInteger()
-    override def newThread(r: Runnable): Thread = {
-      val t = new Thread(r)
-      t.setDaemon(true)
-      t.setName("jdbc-pool-" + id.incrementAndGet())
-      t
-    }
-  })
+  override def tx: SqlDb[F, ?] ~> F = FunctionK.lift(doTx)
 
-  override def tx: SqlDb ~> F = FunctionK.lift(doTx)
+  private def doTx[A](t: SqlDb[F, A]): F[A] = for {
+    _ <- jdbcPool.shift
+    r <- inTransaction(t.apply)
+  } yield r
 
-  private def doTx[A](t: SqlDb[A]): F[A] = Async[F].async { cb =>
-    jdbcPool.submit(() => {
-      cb(inTransaction(t.f))
-    }.asInstanceOf[Runnable])
-  }
-
-  private def inTransaction[T](f: Connection => Either[Throwable, T]): Either[Throwable, T] = Try {
+  private def inTransaction[T](f: Connection => F[T]): F[T] =
     withConnection { conn =>
       conn.setAutoCommit(false)
-      try {
-        val r = f(conn)
-        conn.commit()
-        r
-      } catch {
-        case e: Throwable =>
-          conn.rollback()
-          Left(e)
+
+      f(conn).attempt.flatMap {
+
+        case Left(e) =>
+          Sync[F].delay(conn.rollback()).flatMap(_ => Sync[F].raiseError(e))
+
+        case Right(r) =>
+          Sync[F].delay(conn.commit()).map(_ => r)
       }
     }
-  }.toEither.flatMap(identity)
 
-  private def withConnection[T](f: Connection => T): T = {
-    val conn = ds.getConnection
-    try {
-      f(conn)
-    } finally {
-      Try(conn.close())
-    }
+  private def withConnection[T](f: Connection => F[T]): F[T] = {
+    val c: F[Connection] = Sync[F].delay(ds.getConnection)
+
+    Sync[F].bracket(c)(f)(conn => Sync[F].delay(Try(conn.close())))
   }
 }

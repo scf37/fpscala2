@@ -1,6 +1,7 @@
 package me.scf37.fpscala2
 
 import cats.Eval
+import cats.effect.IO
 import me.scf37.fpscala2.config.ApplicationConfig
 import me.scf37.fpscala2.config.DbConfig
 import me.scf37.fpscala2.config.JsonConfig
@@ -27,7 +28,7 @@ object Main {
       )
     )
 
-    val app = new Application[Eval](config)
+    val app = new Application[Eval, IO](config)
 
     val server = app.serverModule.server.value
 

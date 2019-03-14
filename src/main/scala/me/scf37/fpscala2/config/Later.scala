@@ -2,6 +2,11 @@ package me.scf37.fpscala2.config
 
 import cats.Eval
 
+/**
+  * Typeclass for monads supporting lazy evaluation and result memoization
+  *
+  * @tparam F
+  */
 trait Later[F[_]] {
   def later[A](f: => A): F[A]
 }

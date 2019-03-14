@@ -1,13 +1,14 @@
 package me.scf37.fpscala2.web
 
 import cats.Eval
+import cats.effect.IO
 import com.twitter.finagle.http.RequestBuilder
 import com.twitter.io.Buf
 import me.scf37.fpscala2.memory.MemoryApp
 import org.scalatest.FreeSpec
 
 class WebTest extends FreeSpec {
-  val app = new MemoryApp[Eval]
+  val app = new MemoryApp[Eval, IO]
   val service = app.webModule.service.value
 
   "404 is empty response" in {
