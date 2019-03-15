@@ -6,4 +6,5 @@ case class Todo(
 )
 
 object Todo {
+
 }

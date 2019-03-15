@@ -1,8 +1,7 @@
-package me.scf37.fpscala2.config.module
+package me.scf37.fpscala2.module
 
 import cats.Monad
 import cats.effect.Sync
-import me.scf37.fpscala2.config.Later
 import me.scf37.fpscala2.dao.TodoDao
 import me.scf37.fpscala2.dao.sql.TodoDaoSql
 import me.scf37.fpscala2.db.Db

@@ -1,14 +1,13 @@
-package me.scf37.fpscala2.config.module
+package me.scf37.fpscala2.module
 
 import cats.Monad
 import cats.effect.Sync
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.twitter.finatra.json.FinatraObjectMapper
 import com.twitter.finatra.json.modules.FinatraJacksonModule
-import me.scf37.fpscala2.config.JsonConfig
-import me.scf37.fpscala2.config.Later
 import me.scf37.fpscala2.logging.Log
 import me.scf37.fpscala2.logging.LogImpl
+import me.scf37.fpscala2.module.config.JsonConfig
 
 trait CommonModule[F[_], I[_]] {
   def json: I[FinatraObjectMapper]

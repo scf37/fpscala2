@@ -18,7 +18,8 @@ class ExceptionFilter[F[_]: Sync](om: FinatraObjectMapper) extends Filter[F] {
   override def apply(orig: Request => F[Response]): Request => F[Response] = req => {
 
     Sync[F].defer(orig(req)).recoverWith {
-      case e: RestException => respond(Status.BadRequest, Seq(e.getMessage))
+
+      case e: RestException => respond(Status.fromCode(e.status), Seq(e.getMessage))
 
       case e: CaseClassMappingException => respond(Status.BadRequest, e.errors.map(_.getMessage()))
 

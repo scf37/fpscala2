@@ -1,4 +1,4 @@
-package me.scf37.fpscala2.config.module
+package me.scf37.fpscala2.module
 
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
@@ -7,18 +7,16 @@ import java.util.concurrent.atomic.AtomicInteger
 import cats.Monad
 import cats.effect.Async
 import cats.effect.ContextShift
+import cats.implicits._
 import javax.sql.DataSource
-import me.scf37.fpscala2.config.DbConfig
-import me.scf37.fpscala2.config.Later
+import me.scf37.fpscala2.db.DbEval
 import me.scf37.fpscala2.db.TxManager
-import me.scf37.fpscala2.db.sql.SqlDb
 import me.scf37.fpscala2.db.sql.SqlTxManager
+import me.scf37.fpscala2.module.config.DbConfig
 import org.apache.commons.dbcp2.DriverManagerConnectionFactory
 import org.apache.commons.dbcp2.PoolableConnectionFactory
 import org.apache.commons.dbcp2.PoolingDataSource
 import org.apache.commons.pool2.impl.GenericObjectPool
-import cats.implicits._
-import me.scf37.fpscala2.db.DbEval
 import org.flywaydb.core.Flyway
 
 import scala.concurrent.ExecutionContext
@@ -28,7 +26,8 @@ trait DbModule[F[_], DbEffect[_], I[_]] {
 }
 
 class DbModuleImpl[F[_]: Async, DbEffect[_], I[_]: Later: Monad](
-  config: DbConfig
+  config: DbConfig,
+  alwaysRollback: Boolean = false
 )(implicit DE: DbEval[DbEffect, F]
 ) extends DbModule[F, DbEffect, I] {
 

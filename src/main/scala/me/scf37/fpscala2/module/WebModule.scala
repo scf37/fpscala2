@@ -1,4 +1,4 @@
-package me.scf37.fpscala2.config.module
+package me.scf37.fpscala2.module
 
 import cats.Monad
 import cats.effect.Sync
@@ -7,7 +7,7 @@ import com.twitter.finagle.http.Method
 import com.twitter.finagle.http.Request
 import com.twitter.finagle.http.Response
 import com.twitter.finagle.http.Status
-import me.scf37.fpscala2.config.Later
+import me.scf37.fpscala2.controller.TodoRequest
 import me.scf37.fpscala2.http.ExceptionFilter
 import me.scf37.fpscala2.http.Route
 import me.scf37.fpscala2.model.Todo
@@ -42,12 +42,15 @@ class WebModuleImpl[F[_]: Sync, I[_]: Monad: Later](
     List(
       Route.mk[F, Response](Method.Get, "/items")((req, ctx) => toJson(todoController.list())),
 
+      Route.mk[F, Response](Method.Get, "/items/:id")((req, ctx) =>
+        toJson(todoController.get(ctx(":id")))),
+
       Route.mk[F, Response](Method.Post, "/items/:id")((req, ctx) =>
-        toJson(todoController.create(fromJson[Todo](req).copy(id = ctx(":id"))))
+        toJson(todoController.create(ctx(":id"), fromJson[TodoRequest](req)))
       ),
 
       Route.mk[F, Response](Method.Put, "/items/:id")((req, ctx) =>
-        toJson(todoController.update(fromJson[Todo](req).copy(id = ctx(":id"))))
+        toJson(todoController.update(ctx(":id"), fromJson[TodoRequest](req)))
       ),
 
       Route.mk[F, Response](Method.Delete, "/items/:id")((req, ctx) =>

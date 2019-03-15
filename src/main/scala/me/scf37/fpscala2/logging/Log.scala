@@ -1,10 +1,10 @@
 package me.scf37.fpscala2.logging
 
-import com.twitter.finagle.http.Response
-
 trait Log[F[_]] {
 
   def logInfo(msg: => String): F[Unit]
+
+  def logAudit[T](operation: String, params: String*)(f: F[T]): F[T]
 
   def logRequest(msg: => String): F[Unit]
 

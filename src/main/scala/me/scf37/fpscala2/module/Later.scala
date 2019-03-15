@@ -1,4 +1,4 @@
-package me.scf37.fpscala2.config
+package me.scf37.fpscala2.module
 
 import cats.Eval
 

@@ -26,7 +26,8 @@ lazy val dependencies = Seq(
   "org.flywaydb" % "flyway-core" % "5.2.4",
   "org.postgresql" % "postgresql" % "42.1.4",
   "org.apache.commons" % "commons-dbcp2" % "2.6.0",
-  "ch.qos.logback" % "logback-classic" % "1.2.3"
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
+  "me.scf37.config3" %% "config3" % "1.0.0"
 )
 
 lazy val testDependencies = Seq(
@@ -38,6 +39,7 @@ lazy val testDependencies = Seq(
 
 val fpscala2 = project.in(file("."))
     .settings(scalaSettings)
+    .settings(resolvers += "Scf37" at "https://dl.bintray.com/scf37/maven/")
     .settings(libraryDependencies ++= dependencies)
     .settings(libraryDependencies ++= testDependencies)
 

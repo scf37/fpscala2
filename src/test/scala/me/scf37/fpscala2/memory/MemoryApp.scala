@@ -5,13 +5,13 @@ import java.sql.Connection
 import cats.Monad
 import cats.effect.Effect
 import me.scf37.fpscala2.Application
-import me.scf37.fpscala2.config.ApplicationConfig
-import me.scf37.fpscala2.config.Later
-import me.scf37.fpscala2.config.module.DaoModule
-import me.scf37.fpscala2.config.module.DbModule
+import me.scf37.fpscala2.module.Later
+import me.scf37.fpscala2.module.DaoModule
+import me.scf37.fpscala2.module.DbModule
 import me.scf37.fpscala2.db.Db
 import me.scf37.fpscala2.db.DbEval
 import me.scf37.fpscala2.memory.MemoryApp._
+import me.scf37.fpscala2.module.config.ApplicationConfig
 
 class MemoryApp[I[_]: Later: Monad, F[_]: Effect](
 ) extends Application[I, F, F](ApplicationConfig.testConfig) {

@@ -1,4 +1,4 @@
-package me.scf37.fpscala2.config.module
+package me.scf37.fpscala2.module
 
 import cats.Monad
 import cats.effect.Sync
