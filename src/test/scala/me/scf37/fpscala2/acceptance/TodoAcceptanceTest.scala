@@ -59,6 +59,13 @@ class TodoAcceptanceTest extends FreeSpec {
       assert(post(s"/items/$id", Map("text" -> text)).statusCode == 200)
       assert(post(s"/items/$id", Map("text" -> text)).statusCode == 400)
     }
+
+    "validation is present" in {
+      val r = post(s"/items/invalid-id", Map("text" -> Seq.fill(101)('A').mkString))
+      assert(r.statusCode == 400)
+      assert(r.contentString ==
+        """{"errors":["id: must only contain alphanumeric characters or underscore","text: length is not less than or equal 100"]}""")
+    }
   }
 
   "put" - {

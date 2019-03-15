@@ -43,6 +43,14 @@ class WebTest extends FreeSpec {
     assert(r.contentString == """{"id":"142","text":"text"}""")
   }
 
+  "nulls are not accepted for required fields" in {
+    val r = service(url("/items/241").buildPost(
+      Buf.Utf8("""{"id":"t1", "text": null}"""))
+    ).unsafeRunSync()
+    assert(r.statusCode == 400)
+    assert(r.contentString == """{"errors":["text: field is required"]}""")
+  }
+
   private def url(path: String) = RequestBuilder().url(s"http://local$path")
 
 }

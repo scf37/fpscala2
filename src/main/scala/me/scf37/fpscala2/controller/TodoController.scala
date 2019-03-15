@@ -1,5 +1,6 @@
 package me.scf37.fpscala2.controller
 
+import cats.data.ValidatedNel
 import me.scf37.fpscala2.model.Todo
 
 /**
@@ -13,9 +14,9 @@ trait TodoController[F[_]] {
 
   def get(id: String): F[Todo]
 
-  def create(id: String, todo: TodoRequest): F[Todo]
+  def create(id: String, todo: ValidatedNel[String, TodoRequest]): F[Todo]
 
-  def update(id: String, todo: TodoRequest): F[Todo]
+  def update(id: String, todo: ValidatedNel[String, TodoRequest]): F[Todo]
 
   def delete(id: String): F[Boolean]
 }

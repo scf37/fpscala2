@@ -26,7 +26,7 @@ class ExceptionFilter[F[_]: Sync](
 
       case e: RestException => for {
         _ <- log.logValidationError(e.getMessage, e)
-        r <- respond(Status.fromCode(e.status), Seq(e.getMessage))
+        r <- respond(Status.fromCode(e.status), e.errors)
       } yield r
 
       case e: CaseClassMappingException => for {
@@ -57,7 +57,7 @@ class ExceptionFilter[F[_]: Sync](
   private def respond(status: Status, errors: Seq[String]): F[Response] = {
     val r = Response(status)
     r.setContentTypeJson()
-    r.content(om.writeValueAsBuf(Map("errors" -> errors)))
+    r.content(om.writeValueAsBuf(Map("errors" -> errors.sorted)))
     r.pure[F]
   }
 }
