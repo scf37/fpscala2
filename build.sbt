@@ -1,3 +1,4 @@
+
 val scalaSettings = Seq(
   scalaVersion := "2.12.5",
   scalacOptions ++= compilerOptions
@@ -35,10 +36,10 @@ lazy val testDependencies = Seq(
   "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.4"
 ).map(_ % "test")
 
-
-
 val fpscala2 = project.in(file("."))
     .settings(scalaSettings)
+    .enablePlugins(PackPlugin)
+    .settings(packMain := Map("fpscala2" -> "me.scf37.fpscala2.Main"))
     .settings(resolvers += "Scf37" at "https://dl.bintray.com/scf37/maven/")
     .settings(libraryDependencies ++= dependencies)
     .settings(libraryDependencies ++= testDependencies)

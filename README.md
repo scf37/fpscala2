@@ -16,3 +16,4 @@ Features so far:
 - pure logging
 - data access layer tests using embedded postgres
 - acceptance tests using embedded postgres
+- packaging and dockerization. Try it now: `docker run --rm scf37/fpscala2 --help`
