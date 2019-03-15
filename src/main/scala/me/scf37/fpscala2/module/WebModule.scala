@@ -39,20 +39,20 @@ class WebModuleImpl[F[_]: Sync, I[_]: Monad: Later](
 
 
     List(
-      Route.mk[F, Response](Method.Get, "/items")((req, ctx) => toJson(todoController.list())),
+      Route.mk[F, Response](Method.Get, "/api/v1/items")((req, ctx) => toJson(todoController.list())),
 
-      Route.mk[F, Response](Method.Get, "/items/:id")((req, ctx) =>
+      Route.mk[F, Response](Method.Get, "/api/v1/items/:id")((req, ctx) =>
         toJson(todoController.get(ctx(":id")))),
 
-      Route.mk[F, Response](Method.Post, "/items/:id")((req, ctx) =>
+      Route.mk[F, Response](Method.Post, "/api/v1/items/:id")((req, ctx) =>
         toJson(todoController.create(ctx(":id"), fromJson[TodoRequest](req).validate(ctx(":id"))))
       ),
 
-      Route.mk[F, Response](Method.Put, "/items/:id")((req, ctx) =>
+      Route.mk[F, Response](Method.Put, "/api/v1/items/:id")((req, ctx) =>
         toJson(todoController.update(ctx(":id"), fromJson[TodoRequest](req).validate(ctx(":id"))))
       ),
 
-      Route.mk[F, Response](Method.Delete, "/items/:id")((req, ctx) =>
+      Route.mk[F, Response](Method.Delete, "/api/v1/items/:id")((req, ctx) =>
         toJson(todoController.delete(ctx(":id")))
       )
     ).combineAll

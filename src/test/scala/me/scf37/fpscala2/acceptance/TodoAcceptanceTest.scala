@@ -97,14 +97,14 @@ class TodoAcceptanceTest extends FreeSpec {
   }
 
   private def get(path: String) =
-    service(RequestBuilder().url(s"http://local$path").buildGet()).unsafeRunSync()
+    service(RequestBuilder().url(s"http://local/api/v1$path").buildGet()).unsafeRunSync()
 
   private def post(path: String, content: Map[String, Any]) =
-    service(RequestBuilder().url(s"http://local$path").buildPost(om.writeValueAsBuf(content))).unsafeRunSync()
+    service(RequestBuilder().url(s"http://local/api/v1$path").buildPost(om.writeValueAsBuf(content))).unsafeRunSync()
 
   private def put(path: String, content: Map[String, Any]) =
-    service(RequestBuilder().url(s"http://local$path").buildPut(om.writeValueAsBuf(content))).unsafeRunSync()
+    service(RequestBuilder().url(s"http://local/api/v1$path").buildPut(om.writeValueAsBuf(content))).unsafeRunSync()
 
   private def delete(path: String) =
-    service(RequestBuilder().url(s"http://local$path").buildDelete()).unsafeRunSync()
+    service(RequestBuilder().url(s"http://local/api/v1$path").buildDelete()).unsafeRunSync()
 }

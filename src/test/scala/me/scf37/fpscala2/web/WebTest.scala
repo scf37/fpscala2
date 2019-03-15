@@ -51,6 +51,6 @@ class WebTest extends FreeSpec {
     assert(r.contentString == """{"errors":["text: field is required"]}""")
   }
 
-  private def url(path: String) = RequestBuilder().url(s"http://local$path")
+  private def url(path: String) = RequestBuilder().url(s"http://local/api/v1$path")
 
 }
