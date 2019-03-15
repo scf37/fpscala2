@@ -32,7 +32,7 @@ class WebTest extends FreeSpec {
   "empty json results in validation message" in {
     val r = service(url("/items/142").buildPut(Buf.Utf8("{}"))).unsafeRunSync()
     assert(r.statusCode == 400)
-    assert(r.contentString == """{"errors":["id: field is required","text: field is required"]}""")
+    assert(r.contentString == """{"errors":["text: field is required"]}""")
   }
 
   "unknown fields in request are ignored" in {

@@ -62,8 +62,9 @@ class WebModuleImpl[F[_]: Sync, I[_]: Monad: Later](
   override lazy val service: I[Request => F[Response]] = for {
     route <- route
     om <- commonModule.json
+    log <- commonModule.log
   } yield {
-    val filters = new ExceptionFilter[F](om)
+    val filters = new ExceptionFilter[F](om, log)
 
     filters(req => route(req).getOrElse(Response.apply(Status.NotFound).pure[F]))
   }

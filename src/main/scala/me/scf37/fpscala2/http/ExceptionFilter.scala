@@ -9,31 +9,48 @@ import com.twitter.finagle.http.Status
 import com.twitter.finatra.json.FinatraObjectMapper
 import com.twitter.finatra.json.internal.caseclass.exceptions.CaseClassMappingException
 import me.scf37.fpscala2.exception.RestException
+import me.scf37.fpscala2.logging.Log
 
 /**
   * Convert error to REST error response
   *
   */
-class ExceptionFilter[F[_]: Sync](om: FinatraObjectMapper) extends Filter[F] {
+class ExceptionFilter[F[_]: Sync](
+  om: FinatraObjectMapper,
+  log: Log[F]
+) extends Filter[F] {
+
   override def apply(orig: Request => F[Response]): Request => F[Response] = req => {
 
     Sync[F].defer(orig(req)).recoverWith {
 
-      case e: RestException => respond(Status.fromCode(e.status), Seq(e.getMessage))
+      case e: RestException => for {
+        _ <- log.logValidationError(e.getMessage, e)
+        r <- respond(Status.fromCode(e.status), Seq(e.getMessage))
+      } yield r
 
-      case e: CaseClassMappingException => respond(Status.BadRequest, e.errors.map(_.getMessage()))
+      case e: CaseClassMappingException => for {
+        _ <- log.logValidationError(e.getMessage, e)
+        r <- respond(Status.BadRequest, e.errors.map(_.getMessage()))
+      } yield r
 
-      case e: JsonProcessingException =>
-        val loc = Option(e.getLocation).map { loc =>
-          s" [line: ${loc.getLineNr}, column: ${loc.getColumnNr}]"
+      case e: JsonProcessingException => for {
+        _ <- log.logValidationError(e.getMessage, e)
+        r <- {
+          val loc = Option(e.getLocation).map { loc =>
+            s" [line: ${loc.getLineNr}, column: ${loc.getColumnNr}]"
+          }
+          e.clearLocation()
+          respond(Status.BadRequest, Seq(e.getMessage + loc.getOrElse("")))
         }
-        e.clearLocation()
-        respond(Status.BadRequest, Seq(e.getMessage + loc.getOrElse("")))
+      } yield r
 
 
       case e: Throwable =>
-        e.printStackTrace()
-        respond(Status.InternalServerError, Seq("Internal Server Error"))
+        for {
+          _ <- log.logUnexpectedError("Unexpected error occured: " + e.toString, e)
+          r <- respond(Status.InternalServerError, Seq("Internal Server Error"))
+        } yield r
     }
   }
 
