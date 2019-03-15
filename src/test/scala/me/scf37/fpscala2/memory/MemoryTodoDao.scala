@@ -8,7 +8,7 @@ import cats.implicits._
 import scala.collection.mutable
 
 class MemoryTodoDao[F[_]: Monad] extends TodoDao[F] {
-  private var todos = mutable.Buffer.empty[Todo]
+  private val todos = mutable.Buffer.empty[Todo]
 
   override def list(): F[Seq[Todo]] = todos.toSeq.pure[F]
 

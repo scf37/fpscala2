@@ -2,10 +2,19 @@ package me.scf37.fpscala2.exception
 
 import scala.util.control.NoStackTrace
 
-abstract class RestException(val errors: Seq[String], val status: Int)
-  extends RuntimeException(errors.mkString(", ")) with NoStackTrace
+sealed trait RestException extends RuntimeException with NoStackTrace {
+  def errors: Seq[String]
+  def status: Int
+}
 
-case class ResourceAlreadyExistsException(msg: String) extends RestException(Seq(msg), 400)
-case class ResourceNotFoundException(msg: String) extends RestException(Seq(msg), 404)
+abstract class RestExceptionImpl private[exception] (val errors: Seq[String], val status: Int)
+  extends RuntimeException(errors.mkString(", "))
 
-case class ValidationFailedException(errors1: Seq[String]) extends RestException(errors1, 400)
+final case class ResourceAlreadyExistsException(msg: String)
+  extends RestExceptionImpl(Seq(msg), 400) with RestException
+
+final case class ResourceNotFoundException(msg: String)
+  extends RestExceptionImpl(Seq(msg), 404) with RestException
+
+final case class ValidationFailedException(errors1: Seq[String])
+  extends RestExceptionImpl(errors1, 400) with RestException
