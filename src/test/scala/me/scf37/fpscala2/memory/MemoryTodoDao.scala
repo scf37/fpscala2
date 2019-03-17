@@ -1,9 +1,9 @@
 package me.scf37.fpscala2.memory
 
 import cats.Monad
+import cats.implicits._
 import me.scf37.fpscala2.dao.TodoDao
 import me.scf37.fpscala2.model.Todo
-import cats.implicits._
 
 import scala.collection.mutable
 

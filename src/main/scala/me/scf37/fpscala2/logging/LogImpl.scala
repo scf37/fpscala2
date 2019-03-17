@@ -1,8 +1,8 @@
 package me.scf37.fpscala2.logging
 
 import cats.effect.Sync
-import org.slf4j.LoggerFactory
 import cats.implicits._
+import org.slf4j.LoggerFactory
 
 class LogImpl[F[_]: Sync] extends Log[F] {
   private val appLog = LoggerFactory.getLogger("app")

@@ -3,7 +3,6 @@ package me.scf37.fpscala2
 import cats.Monad
 import cats.effect.Effect
 import cats.effect.Sync
-import me.scf37.fpscala2.db.SqlEffectLift
 import me.scf37.fpscala2.db.sql.SqlEffectEval
 import me.scf37.fpscala2.db.sql.SqlEffectLift
 import me.scf37.fpscala2.module.CommonModule

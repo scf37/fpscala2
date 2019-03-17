@@ -5,13 +5,12 @@ import java.sql.Connection
 import cats.Monad
 import cats.effect.Effect
 import me.scf37.fpscala2.Application
-import me.scf37.fpscala2.module.Later
-import me.scf37.fpscala2.module.DaoModule
-import me.scf37.fpscala2.module.DbModule
-import me.scf37.fpscala2.db.SqlEffectLift
 import me.scf37.fpscala2.db.sql.SqlEffectEval
 import me.scf37.fpscala2.db.sql.SqlEffectLift
 import me.scf37.fpscala2.memory.MemoryApp._
+import me.scf37.fpscala2.module.DaoModule
+import me.scf37.fpscala2.module.DbModule
+import me.scf37.fpscala2.module.Later
 import me.scf37.fpscala2.module.config.ApplicationConfig
 
 class MemoryApp[I[_]: Later: Monad, F[_]: Effect](

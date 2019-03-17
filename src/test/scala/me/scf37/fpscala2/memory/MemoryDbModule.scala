@@ -2,9 +2,9 @@ package me.scf37.fpscala2.memory
 
 import cats.arrow.FunctionK
 import cats.~>
-import me.scf37.fpscala2.module.Later
-import me.scf37.fpscala2.module.DbModule
 import me.scf37.fpscala2.db.TxManager
+import me.scf37.fpscala2.module.DbModule
+import me.scf37.fpscala2.module.Later
 
 class MemoryDbModule[F[_], I[_]: Later] extends DbModule[F, F, I] {
 
