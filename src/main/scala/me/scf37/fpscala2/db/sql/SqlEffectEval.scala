@@ -7,7 +7,7 @@ import java.sql.Connection
   * Typeclass for evaluation of database effect.
   *
   */
-trait SqlEffectEval[DbEffect[_], F[_]] {
+trait SqlEffectEval[F[_], DbEffect[_]] {
   /**
     * Evaluate database effect f using provided JDBC connection
     *

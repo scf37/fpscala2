@@ -6,19 +6,19 @@ import cats.implicits._
 import me.scf37.fpscala2.controller.TodoController
 import me.scf37.fpscala2.controller.impl.TodoControllerImpl
 
-trait ControllerModule[F[_], I[_]] {
+trait ControllerModule[I[_], F[_]] {
   def todoController: I[TodoController[F]]
 }
 
-class ControllerModuleImpl[F[_]: Sync, T[_], I[_]: Monad](
-  commonModule: CommonModule[F, I],
-  serviceModule: ServiceModule[T, I],
-  dbModule: DbModule[F, T, I]
-) extends ControllerModule[F, I] {
+class ControllerModuleImpl[I[_]: Monad, F[_]: Sync, DbEffect[_]](
+  commonModule: CommonModule[I, F],
+  serviceModule: ServiceModule[I, DbEffect],
+  dbModule: DbModule[I, F, DbEffect]
+) extends ControllerModule[I, F] {
 
   override lazy val todoController: I[TodoController[F]] = for {
     todoService <- serviceModule.todoService
     tx <- dbModule.tx
     log <- commonModule.log
-  } yield new TodoControllerImpl[F, T](todoService, tx = tx, log = log)
+  } yield new TodoControllerImpl[F, DbEffect](todoService, tx = tx, log = log)
 }

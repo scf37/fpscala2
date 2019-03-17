@@ -30,19 +30,19 @@ abstract class ApplicationBase[I[_]: Later: Monad, F[_]: Effect, DbEffect[_]: Sy
   config: ApplicationConfig
 ) {
 
-  lazy val commonModule: CommonModule[F, I] = new CommonModuleImpl[F, I](config.json)
+  lazy val commonModule: CommonModule[I, F] = new CommonModuleImpl[I, F](config.json)
 
-  def dbModule: DbModule[F, DbEffect, I]
+  def dbModule: DbModule[I, F, DbEffect]
 
-  def daoModule: DaoModule[DbEffect, I]
+  def daoModule: DaoModule[I, DbEffect]
 
-  lazy val serviceModule: ServiceModule[DbEffect, I] = new ServiceModuleImpl[DbEffect, I](daoModule)
+  lazy val serviceModule: ServiceModule[I, DbEffect] = new ServiceModuleImpl[I, DbEffect](daoModule)
 
-  lazy val controllerModule: ControllerModule[F, I] = new ControllerModuleImpl[F, DbEffect, I](
+  lazy val controllerModule: ControllerModule[I, F] = new ControllerModuleImpl[I, F, DbEffect](
     commonModule, serviceModule, dbModule)
 
-  lazy val webModule: WebModule[F, I] = new WebModuleImpl[F, I](controllerModule, commonModule)
+  lazy val webModule: WebModule[I, F] = new WebModuleImpl[I, F](controllerModule, commonModule)
 
-  lazy val serverModule: ServerModule[F, I] = new ServerModuleImpl[F, I](
+  lazy val serverModule: ServerModule[I, F] = new ServerModuleImpl[I, F](
     webModule, commonModule, config.server)
 }

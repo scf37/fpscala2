@@ -10,15 +10,15 @@ import com.twitter.util.Await
 import com.twitter.util.Future
 import me.scf37.fpscala2.module.config.ServerConfig
 
-trait ServerModule[F[_], I[_]] {
+trait ServerModule[I[_], F[_]] {
   def server: I[() => Unit]
 }
 
-case class ServerModuleImpl[F[_]: Effect, I[_]: Later: Monad](
-  webModule: WebModule[F, I],
-  commonModule: CommonModule[F, I],
+case class ServerModuleImpl[I[_]: Later: Monad, F[_]: Effect](
+  webModule: WebModule[I, F],
+  commonModule: CommonModule[I, F],
   config: ServerConfig
-) extends ServerModule[F, I] {
+) extends ServerModule[I, F] {
 
   override lazy val server: I[() =>  Unit] = for {
     service <- webModule.service

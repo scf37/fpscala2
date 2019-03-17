@@ -21,15 +21,15 @@ import org.flywaydb.core.Flyway
 
 import scala.concurrent.ExecutionContext
 
-trait DbModule[F[_], DbEffect[_], I[_]] {
+trait DbModule[I[_], F[_], DbEffect[_]] {
   def tx: I[TxManager[F, DbEffect]]
 }
 
-class DbModuleImpl[F[_]: Async, DbEffect[_], I[_]: Later: Monad](
+class DbModuleImpl[I[_]: Later: Monad, F[_]: Async, DbEffect[_]](
   config: DbConfig,
   alwaysRollback: Boolean = false
-)(implicit DE: SqlEffectEval[DbEffect, F]
-) extends DbModule[F, DbEffect, I] {
+)(implicit DE: SqlEffectEval[F, DbEffect]
+) extends DbModule[I, F, DbEffect] {
 
   override lazy val tx: I[TxManager[F, DbEffect]] = for {
     _ <- flyway

@@ -6,7 +6,7 @@ import me.scf37.fpscala2.db.TxManager
 import me.scf37.fpscala2.module.DbModule
 import me.scf37.fpscala2.module.Later
 
-class MemoryDbModule[F[_], I[_]: Later] extends DbModule[F, F, I] {
+class MemoryDbModule[I[_]: Later, F[_]] extends DbModule[I, F, F] {
 
   override lazy val tx: I[TxManager[F, F]] = Later[I].later {
     new TxManager[F, F] {

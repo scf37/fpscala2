@@ -27,7 +27,7 @@ class SqlTxManager[F[_]: Sync, DbEffect[_]](
   jdbcPool: ContextShift[F],
   alwaysRollback: Boolean = false
 )(
-  implicit DE: SqlEffectEval[DbEffect, F]
+  implicit DE: SqlEffectEval[F, DbEffect]
 ) extends TxManager[F, DbEffect] {
 
   override def tx: DbEffect ~> F = FunctionK.lift(doTx)

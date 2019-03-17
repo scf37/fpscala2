@@ -9,15 +9,15 @@ import me.scf37.fpscala2.logging.Log
 import me.scf37.fpscala2.logging.LogImpl
 import me.scf37.fpscala2.module.config.JsonConfig
 
-trait CommonModule[F[_], I[_]] {
+trait CommonModule[I[_], F[_]] {
   def json: I[FinatraObjectMapper]
 
   def log: I[Log[F]]
 }
 
-class CommonModuleImpl[F[_]: Sync, I[_]: Later: Monad](
+class CommonModuleImpl[I[_]: Later: Monad, F[_]: Sync](
   jsonConfig: JsonConfig
-) extends CommonModule[F, I] {
+) extends CommonModule[I, F] {
 
   override lazy val json: I[FinatraObjectMapper] = Later[I].later {
     val om = FinatraJacksonModule.provideScalaObjectMapper(null)

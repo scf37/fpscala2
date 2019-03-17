@@ -17,11 +17,11 @@ class Application[I[_]: Later: Monad, F[_]: Effect, DbEffect[_]: Sync](
   config: ApplicationConfig
 )(
   implicit
-  DB: SqlEffectLift[DbEffect, F],
-  DE: SqlEffectEval[DbEffect, F]
+  DB: SqlEffectLift[F, DbEffect],
+  DE: SqlEffectEval[F, DbEffect]
 ) extends ApplicationBase[I, F, DbEffect](config) {
 
-  override lazy val dbModule: DbModule[F, DbEffect, I] = new DbModuleImpl[F, DbEffect, I](config.db)
+  override lazy val dbModule: DbModule[I, F, DbEffect] = new DbModuleImpl[I, F, DbEffect](config.db)
 
-  override lazy val daoModule: DaoModule[DbEffect, I] = new DaoModuleImpl[DbEffect, F, I]()
+  override lazy val daoModule: DaoModule[I, DbEffect] = new DaoModuleImpl[I, F, DbEffect]()
 }

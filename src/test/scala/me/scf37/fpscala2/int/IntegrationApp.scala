@@ -15,11 +15,11 @@ class IntegrationApp[I[_] : Later : Monad, F[_] : Effect, DbEffect[_] : Sync](
   config: ApplicationConfig
 )(
   implicit
-  DB: SqlEffectLift[DbEffect, F],
-  DE: SqlEffectEval[DbEffect, F]
+  DB: SqlEffectLift[F, DbEffect],
+  DE: SqlEffectEval[F, DbEffect]
 ) extends Application[I, F, DbEffect](config) {
 
-  override lazy val dbModule = new DbModuleImpl[F, DbEffect, I](config.db, alwaysRollback = true)
+  override lazy val dbModule = new DbModuleImpl[I, F, DbEffect](config.db, alwaysRollback = true)
 }
 
 object IntegrationApp {
@@ -28,8 +28,8 @@ object IntegrationApp {
     db: DbConfig
   )(
     implicit
-    DB: SqlEffectLift[DbEffect, F],
-    DE: SqlEffectEval[DbEffect, F]
+    DB: SqlEffectLift[F, DbEffect],
+    DE: SqlEffectEval[F, DbEffect]
   ): IntegrationApp[I, F, DbEffect] = {
 
     val cfg = ApplicationConfig.testConfig.copy(db = db)

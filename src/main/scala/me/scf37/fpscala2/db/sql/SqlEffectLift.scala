@@ -8,7 +8,7 @@ import java.sql.Connection
   *
   * Database effect required java.sql.Connection instance for evaluation.
   */
-trait SqlEffectLift[DbEffect[_], F[_]] {
+trait SqlEffectLift[F[_], DbEffect[_]] {
   def lift[A](f: Connection => F[A]): DbEffect[A]
 }
 

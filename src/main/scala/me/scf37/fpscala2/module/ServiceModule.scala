@@ -6,11 +6,11 @@ import cats.implicits._
 import me.scf37.fpscala2.service.TodoService
 import me.scf37.fpscala2.service.impl.TodoServiceImpl
 
-trait ServiceModule[F[_], I[_]] {
+trait ServiceModule[I[_], F[_]] {
   def todoService: I[TodoService[F]]
 }
 
-class ServiceModuleImpl[F[_]: Sync, I[_]: Monad](daoModule: DaoModule[F, I]) extends ServiceModule[F, I] {
+class ServiceModuleImpl[I[_]: Monad, F[_]: Sync](daoModule: DaoModule[I, F]) extends ServiceModule[I, F] {
   override lazy val todoService: I[TodoService[F]] = {
     for {
       dao <- daoModule.todoDao
