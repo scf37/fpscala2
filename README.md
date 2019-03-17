@@ -38,11 +38,11 @@ Every effect can be created from computation definition, usually function (lifte
 and at some time later can be run, extracting computation result (evaluated)
 
 Application uses three types of effects:
-- Generic effect F[_]. 
+- Generic effect `F[_]`. 
   - This is generic F used for asynchonous code with lazy evaluation, e.g. cats IO or monix Task
-- Abstract database effect DbEffect[_]/concrete database effect SqlEffect[F[_], ?]
+- Abstract database effect `DbEffect[_]` concrete database effect `SqlEffect[F[_], ?]`
   - It wraps function `java.sql.Connection => T`. Usual synchronous database code takes this form. Instance of `java.sql.Connection` is needed to evaluate this effect. 
-- application initialization effect I[_]
+- application initialization effect `I[_]`
   - it wraps component initialization code. It is lazy so components will only be created on demand and caches its result to produce singletons
   
 ### Modules
