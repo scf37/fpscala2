@@ -59,3 +59,4 @@ In addition, it supports composition, precise explicit dependency management and
 - delayed logging - delay logging evaluation till end of request processing to decide log level based on response (e.g. enable debug logging for failed requests only)
 - find better way to manage Application effects (3 seems to be a bit high)
 - add scalacheck?
+- use `Resource` for `I[_]`? Not sure I should care about proper shutdown - well-written application should behave well in case of forced termination.
