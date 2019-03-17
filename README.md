@@ -11,7 +11,8 @@ Features so far:
 - configuration from multiple sources (including `--help` command line parameter)
 - pure data access layer based on JDBC
 - pure JDBC transaction management
-- input validation
+- quality JSON handling and validation (with readable messages, including reason, line and column)
+- input validation (using Validated)
 - quality error handling (error classification, REST error messages)
 - pure logging
 - data access layer tests using embedded postgres
