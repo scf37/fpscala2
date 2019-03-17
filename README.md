@@ -50,4 +50,12 @@ Application uses three types of effects:
 Modules system used can be seen as extension of well-known cake pattern keeping its strengths 
     of ability to override any instance or to get any instance from assembled application.
     
-In addition, it supports composition, precise explicit dependency management and lazy evaluation.      
+In addition, it supports composition, precise explicit dependency management and lazy evaluation.     
+
+## TODOs
+
+- Immutable in-memory dao using `StateT`
+- request context (including requestId for logging) using `Kleisli[F, Context, ?]` instead of F
+- delayed logging - delay logging evaluation till end of request processing to decide log level based on response (e.g. enable debug logging for failed requests only)
+- find better way to manage Application effects (3 seems to be a bit high)
+- add scalacheck?
