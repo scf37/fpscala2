@@ -10,6 +10,13 @@ import me.scf37.fpscala2.dao.TodoDao
 import me.scf37.fpscala2.db.sql.SqlEffectLift
 import me.scf37.fpscala2.model.Todo
 
+/**
+  * TodoDao implementation using jdbc Connection
+  *
+  * @param DB typeclass to lift Connection => T function to DbEffect
+  * @tparam F generic effect
+  * @tparam DbEffect database effect
+  */
 class TodoDaoSql[F[_]: Sync, DbEffect[_]: Monad](
   implicit DB: SqlEffectLift[F, DbEffect]
 ) extends TodoDao[DbEffect] {

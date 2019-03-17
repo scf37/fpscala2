@@ -4,6 +4,13 @@ import cats.kernel.Monoid
 import com.twitter.finagle.http.Method
 import com.twitter.finagle.http.Request
 
+/**
+  * HTTP Route is a function that tries to convert request to response.
+  * If request does not match this route, it returns None
+  *
+  * @tparam F
+  * @tparam Resp
+  */
 trait Route[F[_], Resp] extends (Request => Option[F[Resp]]) {
 
   override def apply(req: Request): Option[F[Resp]]

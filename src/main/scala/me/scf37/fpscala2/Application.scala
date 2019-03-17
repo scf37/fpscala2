@@ -12,7 +12,6 @@ import me.scf37.fpscala2.module.DbModuleImpl
 import me.scf37.fpscala2.module.Later
 import me.scf37.fpscala2.module.config.ApplicationConfig
 
-
 class Application[I[_]: Later: Monad, F[_]: Effect, DbEffect[_]: Sync](
   config: ApplicationConfig
 )(

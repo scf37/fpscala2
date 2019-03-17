@@ -15,7 +15,9 @@ case class TodoRequest(
       validateNonEmpty(id, "id"),
       validateMaxSize(id, "id", 100),
       validateRegex(id, "id", idRegex, "must only contain alphanumeric characters or underscore"),
+
       validateMaxSize(text, "text", 100)
+
     ).sequence.map(_ => this)
 
 }

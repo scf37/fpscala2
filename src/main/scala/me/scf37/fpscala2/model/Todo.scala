@@ -4,7 +4,3 @@ case class Todo(
   id: String,
   text: String
 )
-
-object Todo {
-
-}
