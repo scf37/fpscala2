@@ -1,7 +1,7 @@
 package me.scf37.fpscala2.dao
 
 import cats.effect.IO
-import me.scf37.fpscala2.db.sql.SqlDb
+import me.scf37.fpscala2.db.sql.SqlEffect
 import me.scf37.fpscala2.int.IntegrationTest
 import me.scf37.fpscala2.model.Todo
 
@@ -56,7 +56,7 @@ class TodoDaoTest extends IntegrationTest {
     } yield ()
   }
 
-  private def db[A](value: SqlDb[IO, A]): Unit = {
+  private def db[A](value: SqlEffect[IO, A]): Unit = {
     app.dbModule.tx.value.tx(value).unsafeRunSync()
   }
 }

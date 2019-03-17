@@ -6,13 +6,13 @@ import cats.data.Kleisli
 import cats.effect.Sync
 
 package object sql {
- type SqlDb[F[_], A] = Kleisli[F, Connection, A]
+ type SqlEffect[F[_], A] = Kleisli[F, Connection, A]
 
-  implicit def db[F[_]: Sync]: Db[SqlDb[F, ?], F] = new Db[SqlDb[F, ?], F] {
-    override def lift[A](f: Connection => F[A]): SqlDb[F, A] = Kleisli.apply(f)
+  implicit def db[F[_]: Sync]: SqlEffectLift[SqlEffect[F, ?], F] = new SqlEffectLift[SqlEffect[F, ?], F] {
+    override def lift[A](f: Connection => F[A]): SqlEffect[F, A] = Kleisli.apply(f)
   }
 
-  implicit def dbEval[F[_]: Sync]: DbEval[SqlDb[F, ?], F] = new DbEval[SqlDb[F, ?], F] {
-    override def eval[A](f: SqlDb[F, A], c: Connection): F[A] = f(c)
+  implicit def dbEval[F[_]: Sync]: SqlEffectEval[SqlEffect[F, ?], F] = new SqlEffectEval[SqlEffect[F, ?], F] {
+    override def eval[A](f: SqlEffect[F, A], c: Connection): F[A] = f(c)
   }
 }

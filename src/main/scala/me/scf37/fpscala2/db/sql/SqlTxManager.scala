@@ -8,7 +8,6 @@ import cats.effect.Sync
 import cats.implicits._
 import cats.~>
 import javax.sql.DataSource
-import me.scf37.fpscala2.db.DbEval
 import me.scf37.fpscala2.db.TxManager
 
 import scala.util.Try
@@ -28,7 +27,7 @@ class SqlTxManager[F[_]: Sync, DbEffect[_]](
   jdbcPool: ContextShift[F],
   alwaysRollback: Boolean = false
 )(
-  implicit DE: DbEval[DbEffect, F]
+  implicit DE: SqlEffectEval[DbEffect, F]
 ) extends TxManager[F, DbEffect] {
 
   override def tx: DbEffect ~> F = FunctionK.lift(doTx)

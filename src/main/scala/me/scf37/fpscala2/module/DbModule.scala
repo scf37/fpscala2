@@ -9,8 +9,8 @@ import cats.effect.Async
 import cats.effect.ContextShift
 import cats.implicits._
 import javax.sql.DataSource
-import me.scf37.fpscala2.db.DbEval
 import me.scf37.fpscala2.db.TxManager
+import me.scf37.fpscala2.db.sql.SqlEffectEval
 import me.scf37.fpscala2.db.sql.SqlTxManager
 import me.scf37.fpscala2.module.config.DbConfig
 import org.apache.commons.dbcp2.DriverManagerConnectionFactory
@@ -28,7 +28,7 @@ trait DbModule[F[_], DbEffect[_], I[_]] {
 class DbModuleImpl[F[_]: Async, DbEffect[_], I[_]: Later: Monad](
   config: DbConfig,
   alwaysRollback: Boolean = false
-)(implicit DE: DbEval[DbEffect, F]
+)(implicit DE: SqlEffectEval[DbEffect, F]
 ) extends DbModule[F, DbEffect, I] {
 
   override lazy val tx: I[TxManager[F, DbEffect]] = for {

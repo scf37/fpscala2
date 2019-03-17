@@ -17,7 +17,7 @@ object Main {
     val config: ApplicationConfig = ApplicationConfig.load(loadConfig(args, env))
 
     import me.scf37.fpscala2.db.sql._
-    val app = new Application[Eval, IO, SqlDb[IO, ?]](config)
+    val app = new Application[Eval, IO, SqlEffect[IO, ?]](config)
 
     val server = app.serverModule.server.value
 

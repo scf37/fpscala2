@@ -7,11 +7,11 @@ import cats.effect.Resource
 import cats.effect.Sync
 import cats.implicits._
 import me.scf37.fpscala2.dao.TodoDao
-import me.scf37.fpscala2.db.Db
+import me.scf37.fpscala2.db.sql.SqlEffectLift
 import me.scf37.fpscala2.model.Todo
 
 class TodoDaoSql[DbEffect[_]: Monad, F[_]: Sync](
-  implicit DB: Db[DbEffect, F]
+  implicit DB: SqlEffectLift[DbEffect, F]
 ) extends TodoDao[DbEffect] {
 
   override def list(): DbEffect[Seq[Todo]] = DB.lift { conn =>

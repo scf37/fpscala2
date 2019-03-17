@@ -3,8 +3,9 @@ package me.scf37.fpscala2
 import cats.Monad
 import cats.effect.Effect
 import cats.effect.Sync
-import me.scf37.fpscala2.db.Db
-import me.scf37.fpscala2.db.DbEval
+import me.scf37.fpscala2.db.SqlEffectLift
+import me.scf37.fpscala2.db.sql.SqlEffectEval
+import me.scf37.fpscala2.db.sql.SqlEffectLift
 import me.scf37.fpscala2.module.CommonModule
 import me.scf37.fpscala2.module.CommonModuleImpl
 import me.scf37.fpscala2.module.ControllerModule
@@ -26,8 +27,8 @@ class Application[I[_]: Later: Monad, F[_]: Effect, DbEffect[_]: Sync](
   config: ApplicationConfig
 )(
   implicit
-  DB: Db[DbEffect, F],
-  DE: DbEval[DbEffect, F]
+  DB: SqlEffectLift[DbEffect, F],
+  DE: SqlEffectEval[DbEffect, F]
 ) {
 
   lazy val commonModule: CommonModule[F, I] = new CommonModuleImpl[F, I](config.json)

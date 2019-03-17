@@ -11,5 +11,5 @@ abstract class IntegrationTest extends FreeSpec {
 
 object IntegrationTest {
   import me.scf37.fpscala2.db.sql._
-  lazy val app = IntegrationApp.make[Eval, IO, SqlDb[IO, ?]](EmbeddedPostgres.instance)
+  lazy val app = IntegrationApp.make[Eval, IO, SqlEffect[IO, ?]](EmbeddedPostgres.instance)
 }
