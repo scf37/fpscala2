@@ -1,6 +1,6 @@
 package me.scf37.fpscala2.service.impl
 
-import cats.effect.Sync
+import cats.MonadError
 import cats.implicits._
 import me.scf37.fpscala2.dao.TodoDao
 import me.scf37.fpscala2.exception.ResourceAlreadyExistsException
@@ -8,8 +8,10 @@ import me.scf37.fpscala2.exception.ResourceNotFoundException
 import me.scf37.fpscala2.model.Todo
 import me.scf37.fpscala2.service.TodoService
 
-class TodoServiceImpl[F[_]: Sync](
+class TodoServiceImpl[F[_]](
   dao: TodoDao[F]
+)(
+  implicit ME: MonadError[F, Throwable]
 ) extends TodoService[F] {
 
   override def list(): F[Seq[Todo]] = dao.list()
