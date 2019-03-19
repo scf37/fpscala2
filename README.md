@@ -56,7 +56,12 @@ In addition, it supports composition, precise explicit dependency management and
 
 - Immutable in-memory dao using `StateT`
 - request context (including requestId for logging) using `Kleisli[F, Context, ?]` instead of F
+- application statistics: query and transaction execution timings. Finagle also provides request timing stats, make it more explicit somehow?
 - delayed logging - delay logging evaluation till end of request processing to decide log level based on response (e.g. enable debug logging for failed requests only)
 - find better way to manage Application effects (3 seems to be a bit high)
 - add scalacheck?
+- add scalafmt?
+- consider moving to http4s?
 - use `Resource` for `I[_]`? Not sure I should care about proper shutdown - well-written application should behave well in case of forced termination.
+- Add request flow control: timeouts, parallel request count limit
+- cancellation on timeout? Does it make sense on JDBC? Will it improve behavior of overloaded app?
