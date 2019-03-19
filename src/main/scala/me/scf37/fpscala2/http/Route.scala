@@ -29,7 +29,8 @@ object Route {
 
   private def matches(req: Request, method: Method, path: String): Option[Map[String, String]] = {
     // intentionally imperative implementation
-    // this method is performance critical so speed is more important than purity
+    // this method is called multiple times on every request so speed is more important than style
+    def pathVariable(part: String): Boolean = part.startsWith(":")
 
     if (req.method != method) return None
 
@@ -40,9 +41,15 @@ object Route {
 
     val pairs = parts.zip(reqParts)
 
-    if (!pairs.forall {case (part, reqPart) => part.startsWith(":") || part == reqPart}) return None
+    val sameParts = pairs.forall {
+      case (part, _) if pathVariable(part) => true
 
-    Some(pairs.filter(_._1.startsWith(":")).toMap)
+      case (part, reqPart) => part == reqPart
+    }
+
+    if (!sameParts) return None
+
+    Some(pairs.filter(kv => pathVariable(kv._1)).toMap)
   }
 
   implicit def monoid[F[_], Resp] = new Monoid[Route[F, Resp]] {
