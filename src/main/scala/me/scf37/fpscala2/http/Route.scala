@@ -28,6 +28,9 @@ object Route {
   }
 
   private def matches(req: Request, method: Method, path: String): Option[Map[String, String]] = {
+    // intentionally imperative implementation
+    // this method is performance critical so speed is more important than purity
+
     if (req.method != method) return None
 
     val parts = path.split("/")
