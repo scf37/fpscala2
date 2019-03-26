@@ -8,6 +8,7 @@ As this is a learning project, custom code is preferred over existing FP librari
 
 - functional modular system
 - layered architecture (dao - service - controller - route)
+- performance: 11k req/sec on my i7 for `GET /api/v1/items`
 - configuration from multiple sources (including `--help` command line parameter)
 - pure data access layer based on JDBC
 - pure JDBC transaction management
@@ -16,6 +17,7 @@ As this is a learning project, custom code is preferred over existing FP librari
 - input validation (using Validated)
 - quality error handling (error classification, REST error messages)
 - pure logging
+- structured audit logging
 - data access layer tests using embedded postgres
 - acceptance tests using embedded postgres
 - packaging and dockerization. Try it now: `docker run --rm scf37/fpscala2 --help`
