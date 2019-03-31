@@ -12,20 +12,22 @@ import me.scf37.fpscala2.module.config.ApplicationConfig
 import me.scf37.fpscala2.module.config.DbConfig
 
 class IntegrationApp[I[_] : Later : Monad, F[_] : Effect, DbEffect[_] : Sync](
-  config: ApplicationConfig
+  config: ApplicationConfig,
+  alwaysRollback: Boolean
 )(
   implicit
   DB: SqlEffectLift[F, DbEffect],
   DE: SqlEffectEval[F, DbEffect]
 ) extends Application[I, F, DbEffect](config) {
 
-  override lazy val dbModule = new DbModuleImpl[I, F, DbEffect](config.db, alwaysRollback = true)
+  override lazy val dbModule = new DbModuleImpl[I, F, DbEffect](config.db, alwaysRollback = alwaysRollback)
 }
 
 object IntegrationApp {
 
   def make[I[_] : Later : Monad, F[_] : Effect, DbEffect[_] : Sync](
-    db: DbConfig
+    db: DbConfig,
+    alwaysRollback: Boolean
   )(
     implicit
     DB: SqlEffectLift[F, DbEffect],
@@ -34,6 +36,6 @@ object IntegrationApp {
 
     val cfg = ApplicationConfig.testConfig.copy(db = db)
 
-    new IntegrationApp[I, F, DbEffect](cfg)
+    new IntegrationApp[I, F, DbEffect](cfg, alwaysRollback)
   }
 }

@@ -36,7 +36,7 @@ class DbModuleImpl[I[_]: Later: Monad, F[_]: Async, DbEffect[_]](
     pool <- jdbcPool
     dataSource <- dataSource
   } yield  {
-    new SqlTxManager[F, DbEffect](dataSource, pool)
+    new SqlTxManager[F, DbEffect](dataSource, pool, alwaysRollback)
   }
 
   private lazy val jdbcPool: I[ContextShift[F]] = Later[I].later {
