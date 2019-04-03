@@ -1,7 +1,5 @@
 package me.scf37.fpscala2.module
 
-import cats.Eval
-
 /**
   * Typeclass for monads supporting lazy evaluation and result memoization.
   * Both properties are required for initialization effect.
@@ -15,7 +13,7 @@ trait Later[I[_]] {
 object Later {
   def apply[I[_]: Later]: Later[I] = implicitly[Later[I]]
 
-  implicit val evalLater: Later[Eval] = new Later[Eval] {
-    override def later[A](f: => A): Eval[A] = cats.Later(f)
+  implicit val lazyInstance: Later[Lazy] = new Later[Lazy] {
+    override def later[A](f: => A): Lazy[A] = Lazy(f)
   }
 }

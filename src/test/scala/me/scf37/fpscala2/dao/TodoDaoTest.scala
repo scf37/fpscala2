@@ -6,7 +6,7 @@ import me.scf37.fpscala2.int.IntegrationTest
 import me.scf37.fpscala2.model.Todo
 
 class TodoDaoTest extends IntegrationTest {
-  val dao = app.daoModule.todoDao.value
+  val dao = app.daoModule.todoDao.value.right.get
 
   "basic CRUD" in db {
     for {
@@ -57,6 +57,6 @@ class TodoDaoTest extends IntegrationTest {
   }
 
   private def db[A](value: SqlEffect[IO, A]): Unit = {
-    app.dbModule.tx.value.tx(value).unsafeRunSync()
+    app.dbModule.tx.value.right.get.tx(value).unsafeRunSync()
   }
 }

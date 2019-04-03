@@ -1,20 +1,20 @@
 package me.scf37.fpscala2.acceptance
 
-import cats.Eval
 import cats.effect.IO
 import com.twitter.finagle.http.RequestBuilder
 import me.scf37.fpscala2.int.IntegrationApp
+import me.scf37.fpscala2.module.Lazy
 import me.scf37.fpscala2.psql.EmbeddedPostgres
 import org.scalatest.FreeSpec
 
 class TodoAcceptanceTest extends FreeSpec {
   import me.scf37.fpscala2.db.sql._
-  val app = IntegrationApp.make[Eval, IO, SqlEffect[IO, ?]](
+  val app = IntegrationApp.make[Lazy, IO, SqlEffect[IO, ?]](
     db = EmbeddedPostgres.acceptanceInstance,
     alwaysRollback = false
   )
-  val service = app.webModule.service.value
-  val om = app.commonModule.json.value
+  val service = app.webModule.service.value.right.get
+  val om = app.commonModule.json.value.right.get
 
   def d = System.nanoTime().toString
 

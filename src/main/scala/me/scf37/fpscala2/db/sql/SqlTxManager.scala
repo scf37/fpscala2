@@ -18,7 +18,7 @@ import scala.util.Try
   * JDBC transactions are run on separate thread pool to avoid suspensions of IO threads
   *
   * @param ds data source to use
-  * @param poolSize maximum number of parallel transactions
+  * @param jdbcPool thread pool for synchronous JDBC code
   * @param alwaysRollback Always rollback transaction, useful for tests
   * @tparam F generic effect
   */
