@@ -4,6 +4,7 @@ import java.util.regex.Pattern
 
 import cats.data.ValidatedNel
 import cats.implicits._
+import tethys.derivation.semiauto._
 
 case class TodoRequest(
   text: String
@@ -23,6 +24,8 @@ case class TodoRequest(
 }
 
 object TodoRequest {
+  implicit val reader = jsonReader[TodoRequest]
+
   private val idRegex = Pattern.compile("[\\w]+")
 
   private def validateMaxSize(s: String, field: String, max: Int): ValidatedNel[String, Unit] =

@@ -20,19 +20,20 @@ class WebTest extends FreeSpec {
   "empty request results in error message" in {
     val r = service(url("/items/142").buildPut(Buf.Empty)).unsafeRunSync()
     assert(r.statusCode == 400)
-    assert(r.contentString == """{"errors":["No content to map due to end-of-input [line: 1, column: 0]"]}""")
+    assert(r.contentString == """{"errors":["Illegal json at '[ROOT]': Expected object start but found: Empty"]}""")
   }
 
   "invalid json results in error message" in {
     val r = service(url("/items/142").buildPut(Buf.Utf8("{\"a\": q}"))).unsafeRunSync()
     assert(r.statusCode == 400)
-    assert(r.contentString == """{"errors":["Unrecognized token 'q': was expecting ('true', 'false' or 'null') [line: 1, column: 9]"]}""")
+    assert(r.contentString == """{"errors":["Unrecognized token 'q': was expecting ('true', 'false' or 'null') [line: 1, column: 8]"]}""")
   }
 
   "empty json results in validation message" in {
     val r = service(url("/items/142").buildPut(Buf.Utf8("{}"))).unsafeRunSync()
     assert(r.statusCode == 400)
-    assert(r.contentString == """{"errors":["text: field is required"]}""")
+    // see https://github.com/tethys-json/tethys/issues/51
+    assert(r.contentString == """{"errors":["Illegal json at '[ROOT]': Can not extract fields from json'text'"]}""")
   }
 
   "unknown fields in request are ignored" in {
@@ -48,7 +49,7 @@ class WebTest extends FreeSpec {
       Buf.Utf8("""{"id":"t1", "text": null}"""))
     ).unsafeRunSync()
     assert(r.statusCode == 400)
-    assert(r.contentString == """{"errors":["text: field is required"]}""")
+    assert(r.contentString == """{"errors":["Illegal json at '[ROOT].text': Expected string value but found: NullValueToken"]}""")
   }
 
   private def url(path: String) = RequestBuilder().url(s"http://local/api/v1$path")

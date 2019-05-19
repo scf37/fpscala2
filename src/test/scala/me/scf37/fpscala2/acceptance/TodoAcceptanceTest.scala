@@ -2,6 +2,7 @@ package me.scf37.fpscala2.acceptance
 
 import cats.effect.IO
 import com.twitter.finagle.http.RequestBuilder
+import com.twitter.io.Buf
 import me.scf37.fpscala2.int.IntegrationApp
 import me.scf37.fpscala2.module.Lazy
 import me.scf37.fpscala2.psql.EmbeddedPostgres
@@ -102,12 +103,15 @@ class TodoAcceptanceTest extends FreeSpec {
   private def get(path: String) =
     service(RequestBuilder().url(s"http://local/api/v1$path").buildGet()).unsafeRunSync()
 
-  private def post(path: String, content: Map[String, Any]) =
-    service(RequestBuilder().url(s"http://local/api/v1$path").buildPost(om.writeValueAsBuf(content))).unsafeRunSync()
+  private def post(path: String, content: Map[String, String]) =
+    service(RequestBuilder().url(s"http://local/api/v1$path").buildPost(json(content))).unsafeRunSync()
 
-  private def put(path: String, content: Map[String, Any]) =
-    service(RequestBuilder().url(s"http://local/api/v1$path").buildPut(om.writeValueAsBuf(content))).unsafeRunSync()
+  private def put(path: String, content: Map[String, String]) =
+    service(RequestBuilder().url(s"http://local/api/v1$path").buildPut(json(content))).unsafeRunSync()
 
   private def delete(path: String) =
     service(RequestBuilder().url(s"http://local/api/v1$path").buildDelete()).unsafeRunSync()
+
+  private def json(content: Map[String, String]): Buf =
+    Buf.Utf8(om.write(content).unsafeRunSync())
 }
