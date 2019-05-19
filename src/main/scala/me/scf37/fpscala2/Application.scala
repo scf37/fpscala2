@@ -25,7 +25,7 @@ class Application[I[_]: Later: Monad, F[_]: Effect, DbEffect[_]: Sync](
 ) {
 
 
-  val commonModule: I[CommonModule[I, F]] = Later[I].later(CommonModule[I, F](config.json))
+  val commonModule: I[CommonModule[I, F]] = Later[I].later(CommonModule[I, F])
 
   val dbModule: I[DbModule[I, F, DbEffect]] =
     Later[I].later(DbModule[I, F, DbEffect](config.db))
