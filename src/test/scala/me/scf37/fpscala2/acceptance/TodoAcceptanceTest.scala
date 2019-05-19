@@ -9,12 +9,12 @@ import org.scalatest.FreeSpec
 
 class TodoAcceptanceTest extends FreeSpec {
   import me.scf37.fpscala2.db.sql._
-  val app = IntegrationApp.make[Lazy, IO, SqlEffect[IO, ?]](
+  val app = IntegrationApp[Lazy, IO, SqlEffect[IO, ?]](
     db = EmbeddedPostgres.acceptanceInstance,
     alwaysRollback = false
   )
-  val service = app.webModule.service.value.right.get
-  val om = app.commonModule.json.value.right.get
+  val service = app.webModule.value.flatMap(_.service.value).right.get
+  val om = app.commonModule.value.flatMap(_.json.value).right.get
 
   def d = System.nanoTime().toString
 

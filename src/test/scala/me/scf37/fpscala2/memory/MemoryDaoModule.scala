@@ -6,7 +6,7 @@ import me.scf37.fpscala2.module.DaoModule
 import me.scf37.fpscala2.module.Later
 
 class MemoryDaoModule[I[_]: Later, F[_]: Monad] extends DaoModule[I, F] {
-  override lazy val todoDao: I[TodoDao[F]] = Later[I].later {
+  override val todoDao: I[TodoDao[F]] = Later[I].later {
     new MemoryTodoDao[F]
   }
 }

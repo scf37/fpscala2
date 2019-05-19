@@ -36,7 +36,7 @@ object Main extends IOApp {
       appConfig = ApplicationConfig.load(config)
 
       app = new Application[Lazy, IO, SqlEffect[IO, ?]](appConfig)
-      server <- EitherT.right(IO.fromEither(app.serverModule.server.value))
+      server <- EitherT.right(IO.fromEither(app.serverModule.value.flatMap(_.server.value)))
       _ <- EitherT.right(IO(server()))
     } yield ()
 

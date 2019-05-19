@@ -10,11 +10,14 @@ trait DaoModule[I[_], DbEffect[_]] {
   def todoDao: I[TodoDao[DbEffect]]
 }
 
-class DaoModuleImpl[I[_]: Later: Monad, F[_]: Sync, DbEffect[_]: Monad](
-  implicit DB: SqlEffectLift[F, DbEffect]
-) extends DaoModule[I, DbEffect] {
+object DaoModule {
 
-  override lazy val todoDao: I[TodoDao[DbEffect]] = Later[I].later {
-    new TodoDaoSql[F, DbEffect]
+  def apply[I[_]: Later: Monad, F[_]: Sync, DbEffect[_]: Monad](
+    implicit DB: SqlEffectLift[F, DbEffect]
+  ) = new DaoModule[I, DbEffect] {
+
+    override val todoDao: I[TodoDao[DbEffect]] = Later[I].later {
+      new TodoDaoSql[F, DbEffect]
+    }
   }
 }

@@ -15,19 +15,22 @@ trait CommonModule[I[_], F[_]] {
   def log: I[Log[F]]
 }
 
-class CommonModuleImpl[I[_]: Later: Monad, F[_]: Sync](
-  jsonConfig: JsonConfig
-) extends CommonModule[I, F] {
+object CommonModule {
 
-  override lazy val json: I[FinatraObjectMapper] = Later[I].later {
-    val om = FinatraJacksonModule.provideScalaObjectMapper(null)
-    if (jsonConfig.pretty) {
-      om.configure(SerializationFeature.INDENT_OUTPUT, true)
+  def apply[I[_]: Later: Monad, F[_]: Sync](
+    jsonConfig: JsonConfig
+  ) = new CommonModule[I, F] {
+
+    override val json: I[FinatraObjectMapper] = Later[I].later {
+      val om = FinatraJacksonModule.provideScalaObjectMapper(null)
+      if (jsonConfig.pretty) {
+        om.configure(SerializationFeature.INDENT_OUTPUT, true)
+      }
+      FinatraJacksonModule.provideCamelCaseFinatraObjectMapper(om)
     }
-    FinatraJacksonModule.provideCamelCaseFinatraObjectMapper(om)
-  }
 
-  override lazy val log: I[Log[F]] = Later[I].later {
-    new LogImpl[F]
+    override val log: I[Log[F]] = Later[I].later {
+      new LogImpl[F]
+    }
   }
 }

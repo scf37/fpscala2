@@ -8,7 +8,7 @@ import me.scf37.fpscala2.module.Later
 
 class MemoryDbModule[I[_]: Later, F[_]] extends DbModule[I, F, F] {
 
-  override lazy val tx: I[TxManager[F, F]] = Later[I].later {
+  override val tx: I[TxManager[F, F]] = Later[I].later {
     new TxManager[F, F] {
       override def tx: F ~> F = FunctionK.lift(impl)
 

@@ -5,13 +5,13 @@ import me.scf37.fpscala2.module.Lazy
 import me.scf37.fpscala2.psql.EmbeddedPostgres
 import org.scalatest.FreeSpec
 
-abstract class IntegrationTest extends FreeSpec {
+trait IntegrationTest extends FreeSpec {
   lazy val app = IntegrationTest.app
 }
 
 object IntegrationTest {
   import me.scf37.fpscala2.db.sql._
-  lazy val app = IntegrationApp.make[Lazy, IO, SqlEffect[IO, ?]](
+  lazy val app = IntegrationApp[Lazy, IO, SqlEffect[IO, ?]](
     db = EmbeddedPostgres.instance,
     alwaysRollback = true
   )

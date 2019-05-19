@@ -1,12 +1,24 @@
 package me.scf37.fpscala2.dao
 
-import cats.effect.IO
-import me.scf37.fpscala2.db.sql.SqlEffect
-import me.scf37.fpscala2.int.IntegrationTest
+import cats.effect.Effect
+import cats.effect.Sync
+import cats.implicits._
+import me.scf37.fpscala2.Application
+import me.scf37.fpscala2.db.TxManager
 import me.scf37.fpscala2.model.Todo
+import me.scf37.fpscala2.module.Lazy
+import org.scalatest.FreeSpec
 
-class TodoDaoTest extends IntegrationTest {
-  val dao = app.daoModule.todoDao.value.right.get
+abstract class TodoDaoTest[F[_]: Effect, DbEffect[_]: Sync] extends FreeSpec {
+
+  protected def app: Application[Lazy, F, DbEffect]
+
+  private val dao: TodoDao[DbEffect] =
+    app.daoModule.value.flatMap(_.todoDao.value).right.get
+
+  private val txManager: TxManager[F, DbEffect] =
+    app.dbModule.value.flatMap(_.tx.value).right.get
+
 
   "basic CRUD" in db {
     for {
@@ -56,7 +68,7 @@ class TodoDaoTest extends IntegrationTest {
     } yield ()
   }
 
-  private def db[A](value: SqlEffect[IO, A]): Unit = {
-    app.dbModule.tx.value.right.get.tx(value).unsafeRunSync()
+  private def db[A](value: DbEffect[A]): Unit = {
+    Effect[F].toIO(txManager.tx(value)).unsafeRunSync()
   }
 }

@@ -10,15 +10,18 @@ trait ControllerModule[I[_], F[_]] {
   def todoController: I[TodoController[F]]
 }
 
-class ControllerModuleImpl[I[_]: Monad, F[_]: Sync, DbEffect[_]](
-  commonModule: CommonModule[I, F],
-  serviceModule: ServiceModule[I, DbEffect],
-  dbModule: DbModule[I, F, DbEffect]
-) extends ControllerModule[I, F] {
+object ControllerModule {
 
-  override lazy val todoController: I[TodoController[F]] = for {
-    todoService <- serviceModule.todoService
-    tx <- dbModule.tx
-    log <- commonModule.log
-  } yield new TodoControllerImpl[F, DbEffect](todoService, tx = tx, log = log)
+  def apply[I[_]: Monad, F[_]: Sync, DbEffect[_]](
+    commonModule: CommonModule[I, F],
+    serviceModule: ServiceModule[I, DbEffect],
+    dbModule: DbModule[I, F, DbEffect]
+  ): ControllerModule[I, F] = new ControllerModule[I, F] {
+
+    override val todoController: I[TodoController[F]] = for {
+      todoService <- serviceModule.todoService
+      tx <- dbModule.tx
+      log <- commonModule.log
+    } yield new TodoControllerImpl[F, DbEffect](todoService, tx = tx, log = log)
+  }
 }
