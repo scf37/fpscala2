@@ -1,5 +1,4 @@
 package me.scf37.fpscala2
-import me.scf37.fpscala2.model.Todo
 import _root_.tethys._
 import _root_.tethys.jackson._
 import me.scf37.fpscala2.controller.TodoRequest
