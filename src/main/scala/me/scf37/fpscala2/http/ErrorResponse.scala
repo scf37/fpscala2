@@ -1,8 +1,4 @@
 package me.scf37.fpscala2.http
-import tethys.derivation.semiauto._
+import me.scf37.fpscala2.tethys.JsonWriter3
 
-case class ErrorResponse(errors: Seq[String])
-
-object ErrorResponse {
-  implicit val writer = jsonWriter[ErrorResponse]
-}
+case class ErrorResponse(errors: Seq[String]) derives JsonWriter3

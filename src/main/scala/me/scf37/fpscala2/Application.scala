@@ -1,8 +1,8 @@
 package me.scf37.fpscala2
 
-import cats.Monad
-import cats.effect.Effect
+import cats.{Monad, MonadThrow}
 import cats.effect.Sync
+import cats.effect.Async
 import cats.implicits._
 import me.scf37.fpscala2.db.sql.SqlEffectEval
 import me.scf37.fpscala2.db.sql.SqlEffectLift
@@ -15,12 +15,13 @@ import me.scf37.fpscala2.module.ServerModule
 import me.scf37.fpscala2.module.ServiceModule
 import me.scf37.fpscala2.module.WebModule
 import me.scf37.fpscala2.module.config.ApplicationConfig
+import cats.effect.std.Dispatcher
 
-class Application[I[_]: Later: Monad, F[_]: Effect, DbEffect[_]: Sync](
+class Application[I[_]: Later: Monad, F[_]: Async : Dispatcher, DbEffect[_]: MonadThrow](
   config: ApplicationConfig
 )(
   implicit
-  DB: SqlEffectLift[F, DbEffect],
+  DB: SqlEffectLift[DbEffect],
   DE: SqlEffectEval[F, DbEffect]
 ) {
 
@@ -28,10 +29,10 @@ class Application[I[_]: Later: Monad, F[_]: Effect, DbEffect[_]: Sync](
   val commonModule: I[CommonModule[I, F]] = Later[I].later(CommonModule[I, F])
 
   val dbModule: I[DbModule[I, F, DbEffect]] =
-    Later[I].later(DbModule[I, F, DbEffect](config.db))
+    Later[I].later(DbModule[I, F, DbEffect](config.db, true))
 
   val daoModule: I[DaoModule[I, DbEffect]] =
-    Later[I].later(DaoModule[I, F, DbEffect])
+    Later[I].later(DaoModule[I, DbEffect])
 
   val serviceModule: I[ServiceModule[I, DbEffect]] = for {
     daoModule <- daoModule

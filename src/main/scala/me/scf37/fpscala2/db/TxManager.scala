@@ -12,5 +12,5 @@ import cats.~>
   * @tparam DbEffect database effect
   */
 trait TxManager[F[_], DbEffect[_]] {
-  def tx: DbEffect ~> F
+  def tx: [A] => DbEffect[A] => F[A]
 }

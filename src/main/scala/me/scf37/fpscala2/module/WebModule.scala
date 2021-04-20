@@ -78,5 +78,4 @@ object WebModule {
       filters(req => route(req).getOrElse(Response.apply(Status.NotFound).pure[F]))
     }
   }
-
 }

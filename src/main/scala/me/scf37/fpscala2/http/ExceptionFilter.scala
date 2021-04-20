@@ -16,16 +16,17 @@ import me.scf37.fpscala2.service.JsonService
 class ExceptionFilter[F[_]: Sync](
   om: JsonService[F],
   log: Log[F]
-) extends Filter[F] {
+) extends Filter[F]:
 
   override def apply(orig: Request => F[Response]): Request => F[Response] = req => {
 
     Sync[F].defer(orig(req)).recoverWith {
 
-      case e: RestException => for {
-        _ <- log.logValidationError(e.getMessage, e)
-        r <- respond(Status.fromCode(e.status), e.errors)
-      } yield r
+      case e: RestException =>
+        for
+          _ <- log.logValidationError(e.getMessage, e)
+          r <- respond(Status.fromCode(e.status), e.errors)
+        yield r
 
       case e: Throwable =>
         for {
@@ -35,15 +36,11 @@ class ExceptionFilter[F[_]: Sync](
     }
   }
 
-  private def respond(status: Status, errors: Seq[String]): F[Response] = {
-    for {
+  private def respond(status: Status, errors: Seq[String]): F[Response] =
+    for
       json <- om.write(ErrorResponse(errors.sorted))
-    } yield {
+    yield
       val r = Response(status)
       r.setContentTypeJson()
       r.contentString = json
       r
-    }
-
-  }
-}

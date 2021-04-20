@@ -6,22 +6,20 @@ import me.scf37.fpscala2.logging.Log
 import me.scf37.fpscala2.logging.LogImpl
 import me.scf37.fpscala2.service.JsonService
 
-trait CommonModule[I[_], F[_]] {
-  def json: I[JsonService[F]]
+case class CommonModule[I[_], F[_]](
+  json: I[JsonService[F]],
+  log: I[Log[F]]
+)
 
-  def log: I[Log[F]]
-}
+object CommonModule:
 
-object CommonModule {
-
-  def apply[I[_]: Later: Monad, F[_]: Sync]: CommonModule[I, F] = new CommonModule[I, F] {
-
-    override val json: I[JsonService[F]] = Later[I].later {
+  def apply[I[_]: Later: Monad, F[_]: Sync]: CommonModule[I, F] = CommonModule[I, F](
+    json = Later[I].later {
       JsonService[F]
-    }
+    },
 
-    override val log: I[Log[F]] = Later[I].later {
+    log = Later[I].later {
       new LogImpl[F]
     }
-  }
-}
+  )
+

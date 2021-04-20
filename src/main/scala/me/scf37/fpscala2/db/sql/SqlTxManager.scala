@@ -1,15 +1,16 @@
 package me.scf37.fpscala2.db.sql
 
 import java.sql.Connection
-
 import cats.arrow.FunctionK
-import cats.effect.ContextShift
+import cats.effect.Async
 import cats.effect.Sync
 import cats.implicits._
 import cats.~>
+
 import javax.sql.DataSource
 import me.scf37.fpscala2.db.TxManager
 
+import scala.concurrent.ExecutionContext
 import scala.util.Try
 
 /**
@@ -22,20 +23,19 @@ import scala.util.Try
   * @param alwaysRollback Always rollback transaction, useful for tests
   * @tparam F generic effect
   */
-class SqlTxManager[F[_]: Sync, DbEffect[_]](
-  ds: DataSource,
-  jdbcPool: ContextShift[F],
-  alwaysRollback: Boolean = false
-)(
-  implicit DE: SqlEffectEval[F, DbEffect]
-) extends TxManager[F, DbEffect] {
+class SqlTxManager[F[_]: Async, DbEffect[_]](
+    ds: DataSource,
+    jdbcPool: ExecutionContext,
+    alwaysRollback: Boolean = false
+  )(
+    implicit DE: SqlEffectEval[F, DbEffect]
+  ) extends TxManager[F, DbEffect]:
 
-  override def tx: DbEffect ~> F = FunctionK.lift(doTx)
+  override def tx: [A] => DbEffect[A] => F[A] = [A] => (dbEffect: DbEffect[A]) => doTx(dbEffect)
 
-  private def doTx[A](t: DbEffect[A]): F[A] = for {
-    _ <- jdbcPool.shift
-    r <- inTransaction(c => DE.eval(t, c))
-  } yield r
+  private def doTx[A](t: DbEffect[A]): F[A] = Async[F].evalOn({
+    inTransaction(c => DE.eval(t, c))
+  }, jdbcPool)
 
   private def inTransaction[T](f: Connection => F[T]): F[T] =
     withConnection { conn =>
@@ -47,13 +47,18 @@ class SqlTxManager[F[_]: Sync, DbEffect[_]](
           Sync[F].delay(conn.rollback()).flatMap(_ => Sync[F].raiseError(e))
 
         case Right(r) =>
-          Sync[F].delay(if (alwaysRollback) conn.rollback() else conn.commit()).map(_ => r)
+          Sync[F].delay {
+            if alwaysRollback then
+              conn.rollback()
+            else
+              conn.commit()
+            r
+          }
       }
     }
 
-  private def withConnection[T](f: Connection => F[T]): F[T] = {
+  private def withConnection[T](f: Connection => F[T]): F[T] =
     val c: F[Connection] = Sync[F].delay(ds.getConnection)
 
     Sync[F].bracket(c)(f)(conn => Sync[F].delay(Try(conn.close())))
-  }
-}
+
