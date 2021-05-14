@@ -9,6 +9,6 @@ import com.twitter.finagle.http.Response
   *
   * @tparam F generic effect type
   */
-trait Filter[F[_]] extends ((Request => F[Response]) => (Request => F[Response])) {
+trait Filter[F[_]] extends ((Request => F[Response]) => (Request => F[Response])):
   override def apply(orig: Request => F[Response]): Request => F[Response]
-}
+

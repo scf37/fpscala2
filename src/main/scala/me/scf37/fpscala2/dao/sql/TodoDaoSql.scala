@@ -1,96 +1,99 @@
 package me.scf37.fpscala2.dao.sql
 
 import java.sql.ResultSet
-
 import cats.Monad
-import cats.effect.Resource
+import cats.MonadError
 import cats.effect.Sync
 import cats.implicits._
 import me.scf37.fpscala2.dao.TodoDao
 import me.scf37.fpscala2.db.sql.SqlEffectLift
 import me.scf37.fpscala2.model.Todo
+import me.scf37.fpscala2.typeclass.SyncResource
 
 /**
-  * TodoDao implementation using jdbc Connection
+  * TodoDao implementation using jdbc Connection.
+  *
+  * JDBC Api is not synchronized and therefore F must be single-threaded
   *
   * @param DB typeclass to lift Connection => T function to DbEffect
-  * @tparam F generic effect
-  * @tparam DbEffect database effect
+  * @tparam F database effect
   */
-class TodoDaoSql[F[_]: Sync, DbEffect[_]: Monad](
-  implicit DB: SqlEffectLift[F, DbEffect]
-) extends TodoDao[DbEffect] {
+class TodoDaoSql[F[_]](
+  using DB: SqlEffectLift[F],
+  ME: MonadError[F, Throwable]
+) extends TodoDao[F]:
 
-  override def list(): DbEffect[Seq[Todo]] = DB.lift { conn =>
-    val r = for {
-      st <- Resource.fromAutoCloseable(Sync[F].delay(conn.createStatement()))
-      rs <- Resource.fromAutoCloseable(Sync[F].delay(st.executeQuery("select uid, text from item order by uid")))
-    } yield {
-      rsIterator(rs)(parse).toList
-    }
+  override def list(): F[Seq[Todo]] = DB.lift { conn =>
+    val r =
+      for
+        st <- SyncResource.fromAutoCloseable(conn.createStatement())
+        rs <- SyncResource.fromAutoCloseable(st.executeQuery("select uid, text from item order by uid"))
+      yield
+        rsIterator(rs)(parse).toList
 
-    r.use(r => Sync[F].delay(r: Seq[Todo]))
+    r.use(_.pure)
   }
 
-  override def save(todo: Todo): DbEffect[Todo] = for {
-    updated <- update(todo)
-    r <- updated.fold(create(todo))(Monad[DbEffect].pure)
-  } yield r
+  override def save(todo: Todo): F[Todo] =
+    for
+      updated <- update(todo)
+      r <- updated.fold(create(todo))(Monad[F].pure)
+    yield r
 
-  override def delete(id: String): DbEffect[Boolean] = DB.lift { conn =>
-    val r = for {
-      st <- Resource.fromAutoCloseable(Sync[F].delay(conn.prepareStatement("delete from item where uid=?")))
-      _ = st.setString(1, id)
-      rows = st.executeUpdate()
-    } yield {
-      rows > 0
-    }
+  override def delete(id: String): F[Boolean] = DB.lift { conn =>
+    val r =
+      for
+        st <- SyncResource.fromAutoCloseable(conn.prepareStatement("delete from item where uid=?"))
+        _ = st.setString(1, id)
+        rows = st.executeUpdate()
+      yield
+        rows > 0
 
-    r.use(r => Sync[F].delay(r))
+    r.use(_.pure)
   }
 
-  override def get(id: String): DbEffect[Option[Todo]] = DB.lift { conn =>
-    val r = for {
-      st <- Resource.fromAutoCloseable(Sync[F].delay(conn.prepareStatement("select uid, text from item where uid=?")))
-      _ = st.setString(1, id)
-      rs <- Resource.fromAutoCloseable(Sync[F].delay(st.executeQuery()))
-    } yield {
-      rsIterator(rs)(parse).toList.headOption
-    }
+  override def get(id: String): F[Option[Todo]] = DB.lift { conn =>
+    val r =
+      for
+        st <- SyncResource.fromAutoCloseable(conn.prepareStatement("select uid, text from item where uid=?"))
+        _ = st.setString(1, id)
+        rs <- SyncResource.fromAutoCloseable(st.executeQuery())
+      yield
+        rsIterator(rs)(parse).toList.headOption
 
-    r.use(r => Sync[F].delay(r))
+    r.use(_.pure)
   }
 
-  private def create(todo: Todo): DbEffect[Todo] = DB.lift { conn =>
-    val r = for {
-      st <- Resource.fromAutoCloseable(Sync[F].delay(conn.prepareStatement(
-        "insert into item(id, uid, text, created, updated)" +
-          " values(nextval('item_id_s'), ?, ?, now(), now()) returning *"
-      )))
-      _ = st.setString(1, todo.id)
-      _ = st.setString(2, todo.text)
-      rs <- Resource.fromAutoCloseable(Sync[F].delay(st.executeQuery()))
-    } yield {
-      rsIterator(rs)(parse).next()
-    }
+  private def create(todo: Todo): F[Todo] = DB.lift { conn =>
+    val r =
+      for
+        st <- SyncResource.fromAutoCloseable(conn.prepareStatement(
+          "insert into item(id, uid, text, created, updated)" +
+            " values(nextval('item_id_s'), ?, ?, now(), now()) returning *"
+        ))
+        _ = st.setString(1, todo.id)
+        _ = st.setString(2, todo.text)
+        rs <- SyncResource.fromAutoCloseable(st.executeQuery())
+      yield
+        rsIterator(rs)(parse).next()
 
-    r.use(r => Sync[F].delay(r))
+    r.use(_.pure)
   }
 
-  private def update(todo: Todo): DbEffect[Option[Todo]] = DB.lift { conn =>
-    val r = for {
-      st <- Resource.fromAutoCloseable(Sync[F].delay(conn.prepareStatement(
-        "update item set uid=?, text=? where uid=? returning *"
-      )))
-      _ = st.setString(1, todo.id)
-      _ = st.setString(2, todo.text)
-      _ = st.setString(3, todo.id)
-      rs <- Resource.fromAutoCloseable(Sync[F].delay(st.executeQuery()))
-    } yield {
-      rsIterator(rs)(parse).toSeq.headOption
-    }
+  private def update(todo: Todo): F[Option[Todo]] = DB.lift { conn =>
+    val r =
+      for
+        st <- SyncResource.fromAutoCloseable(conn.prepareStatement(
+          "update item set uid=?, text=? where uid=? returning *"
+        ))
+        _ = st.setString(1, todo.id)
+        _ = st.setString(2, todo.text)
+        _ = st.setString(3, todo.id)
+        rs <- SyncResource.fromAutoCloseable(st.executeQuery())
+      yield
+        rsIterator(rs)(parse).toSeq.headOption
 
-    r.use(r => Sync[F].delay(r))
+    r.use(_.pure)
   }
 
   private def parse(rs: ResultSet): Todo = Todo(
@@ -99,4 +102,4 @@ class TodoDaoSql[F[_]: Sync, DbEffect[_]: Monad](
 
   private def rsIterator[T](rs: ResultSet)(f: ResultSet => T): Iterator[T] =
     Iterator.continually(rs.next()).takeWhile(identity).map(_ => f(rs))
-}
+

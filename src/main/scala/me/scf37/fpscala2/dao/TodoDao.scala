@@ -7,7 +7,7 @@ import me.scf37.fpscala2.model.Todo
   *
   * @tparam F
   */
-trait TodoDao[F[_]] {
+trait TodoDao[F[_]]:
   def list(): F[Seq[Todo]]
 
   def get(id: String): F[Option[Todo]]
@@ -22,4 +22,3 @@ trait TodoDao[F[_]] {
   def save(todo: Todo): F[Todo]
 
   def delete(id: String): F[Boolean]
-}

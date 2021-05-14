@@ -1,5 +1,5 @@
 # fpscala2
-Production-grade todo app REST API in functional scala
+Production-grade todo app REST API in functional scala3
 
 This is an effort to create high quality application using FP approach with cats.
 As this is a learning project, custom code is preferred over existing FP libraries.
@@ -19,8 +19,12 @@ As this is a learning project, custom code is preferred over existing FP librari
 - pure logging
 - structured audit logging
 - data access layer tests using embedded postgres
+- tests in tagless final style
+- dao layer tests for both embedded postgres and in-memory dao
 - acceptance tests using embedded postgres
+- web tests using in-memory dao implementation
 - packaging and dockerization. Try it now: `docker run --rm scf37/fpscala2 --help`
+- immuatble in-memory dao using applicative context
 
 ## Architecture
 
@@ -56,14 +60,10 @@ In addition, it supports composition, precise explicit dependency management and
 
 ## TODOs
 
-- Immutable in-memory dao using `StateT`
 - request context (including requestId for logging) using `Kleisli[F, Context, ?]` instead of F
 - application statistics: query and transaction execution timings. Finagle also provides request timing stats, make it more explicit somehow?
 - delayed logging - delay logging evaluation till end of request processing to decide log level based on response (e.g. enable debug logging for failed requests only)
-- find better way to manage Application effects (3 seems to be a bit high)
 - add scalacheck?
 - add scalafmt?
-- consider moving to http4s?
-- use `Resource` for `I[_]`? Not sure I should care about proper shutdown - well-written application should behave well in case of forced termination.
 - Add request flow control: timeouts, parallel request count limit
 - cancellation on timeout? Does it make sense on JDBC? Will it improve behavior of overloaded app?

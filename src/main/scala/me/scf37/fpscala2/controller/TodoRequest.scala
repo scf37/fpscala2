@@ -1,14 +1,13 @@
 package me.scf37.fpscala2.controller
 
 import java.util.regex.Pattern
-
 import cats.data.ValidatedNel
 import cats.implicits._
-import tethys.derivation.semiauto._
+import me.scf37.fpscala2.tethys.JsonReader3
 
 case class TodoRequest(
   text: String
-) {
+) derives JsonReader3:
   import TodoRequest._
 
   def validate(id: String): ValidatedNel[String, TodoRequest] =
@@ -21,11 +20,7 @@ case class TodoRequest(
 
     ).sequence.map(_ => this)
 
-}
-
-object TodoRequest {
-  implicit val reader = jsonReader[TodoRequest]
-
+object TodoRequest:
   private val idRegex = Pattern.compile("[\\w]+")
 
   private def validateMaxSize(s: String, field: String, max: Int): ValidatedNel[String, Unit] =
@@ -45,4 +40,3 @@ object TodoRequest {
       s"$field: $msg".invalidNel
     else
       ().validNel
-}

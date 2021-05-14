@@ -8,7 +8,7 @@ import me.scf37.fpscala2.model.Todo
   *
   * @tparam F
   */
-trait TodoController[F[_]] {
+trait TodoController[F[_]]:
 
   def list(): F[Seq[Todo]]
 
@@ -19,4 +19,3 @@ trait TodoController[F[_]] {
   def update(id: String, todo: ValidatedNel[String, TodoRequest]): F[Todo]
 
   def delete(id: String): F[Boolean]
-}

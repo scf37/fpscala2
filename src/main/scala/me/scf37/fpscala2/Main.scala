@@ -3,42 +3,48 @@ package me.scf37.fpscala2
 import cats.Applicative
 import cats.Defer
 import cats.data.EitherT
+import cats.data.Kleisli
 import cats.effect.ExitCode
 import cats.effect.IO
 import cats.effect.IOApp
 import cats.effect.Sync
+import cats.effect.std.Dispatcher
 import cats.implicits._
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import me.scf37.config3.Config3
 import me.scf37.config3.Config3.PrintedConfig
-import me.scf37.fpscala2.db.sql.SqlEffect
-import me.scf37.fpscala2.module.Lazy
 import me.scf37.fpscala2.module.config.ApplicationConfig
+import me.scf37.fpscala2.module.init.{Indi, IndiContext}
 
-object Main extends IOApp {
+import java.sql.Connection
 
-  private def env[F[_]: Applicative: Defer]: F[Option[String]] = Defer[F].defer {
+object Main extends IOApp:
+
+  private def env[F[_]: Sync]: F[Option[String]] = Sync[F].delay {
     Option(System.getProperty("env"))
-      .orElse(Option(System.getenv("env"))).pure[F]
+      .orElse(Option(System.getenv("env")))
   }
 
-  override def run(args: List[String]): IO[ExitCode] = {
+  override def run(args: List[String]): IO[ExitCode] =
+    import cats.effect.unsafe.implicits.global
 
-    val startedApp: EitherT[IO, EagerExit, Unit] = for {
-      envOpt <- env[EitherT[IO, EagerExit, ?]]
+    val startedApp: EitherT[IO, EagerExit, Unit] = for
+      envOpt <- env[EitherT[IO, EagerExit, *]]
 
       configInfo <- loadConfig[IO](args.toArray, envOpt.map(_ + ".conf"))
       (printedConfig, config) = configInfo
 
       _ <- EitherT.right(IO(println(printedConfig.toString)))
 
-      appConfig = ApplicationConfig.load(config)
+      appConfig = Indi.delay[IO, ApplicationConfig](ApplicationConfig.parse(config))
+      app = Application[Indi[IO, *], IO, Kleisli[IO, Connection, *]](appConfig)
 
-      app = new Application[Lazy, IO, SqlEffect[IO, ?]](appConfig)
-      server <- EitherT.right(IO.fromEither(app.serverModule.value.flatMap(_.server.value)))
-      _ <- EitherT.right(IO(server()))
-    } yield ()
+      result = IndiContext[IO].use { ctx =>
+        app.serverModule.server.evalOn(ctx).map(_())
+      }
+      _ <- EitherT.right(result)
+    yield ()
 
     startedApp.value.flatMap {
 
@@ -48,7 +54,6 @@ object Main extends IOApp {
       case Right(_) => IO(ExitCode(0))
     }
 
-  }
 
   private case class EagerExit(message: String, code: ExitCode)
 
@@ -63,12 +68,12 @@ object Main extends IOApp {
   private def loadConfig[F[_]: Sync](
     args: Array[String],
     configFile: Option[String]
-  ): EitherT[F, EagerExit, (PrintedConfig, Config)] = {
+  ): EitherT[F, EagerExit, (PrintedConfig, Config)] =
 
     def isAppConfigKey(key: String) = key.startsWith("app.")
     def isPasswordKey(key: String) = key.contains("password")
 
-    for {
+    for
       reference <- EitherT.pure[F, EagerExit](ConfigFactory.parseResources("reference.conf"))
 
       _ <- EitherT.cond[F](!args.sameElements(Seq("--help")), (),
@@ -91,6 +96,4 @@ object Main extends IOApp {
 
       printedConfig = Config3.printConfig(reference, config, isAppConfigKey, isPasswordKey)
 
-    } yield printedConfig -> config
-  }
-}
+    yield printedConfig -> config

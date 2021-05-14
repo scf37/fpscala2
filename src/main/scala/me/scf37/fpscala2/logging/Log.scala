@@ -1,6 +1,11 @@
 package me.scf37.fpscala2.logging
 
-trait Log[F[_]] {
+/**
+  * Effectful logger
+  *
+  * @tparam F
+  */
+trait Log[F[_]]:
 
   def logInfo(msg: => String): F[Unit]
 
@@ -11,4 +16,3 @@ trait Log[F[_]] {
   def logValidationError(msg: => String, ex: Throwable): F[Unit]
 
   def logUnexpectedError(msg: => String, ex: Throwable): F[Unit]
-}

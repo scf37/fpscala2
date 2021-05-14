@@ -1,6 +1,6 @@
 
 val scalaSettings = Seq(
-  scalaVersion := "2.12.5",
+  scalaVersion := "3.0.0-RC3",
   scalacOptions ++= compilerOptions
 )
 
@@ -8,34 +8,25 @@ lazy val compilerOptions = Seq(
   "-deprecation",
   "-encoding", "UTF-8",
   "-feature",
-  "-deprecation",
-  "-language:implicitConversions",
   "-unchecked",
-  "-Yno-adapted-args",
-  "-Ywarn-dead-code",
-  "-Ywarn-numeric-widen",
-  "-Xlint",
   "-language:_",
-  "-Ypartial-unification"/*,
-  "-Xfatal-warnings"*/
+  "-Ykind-projector"
 )
 
 lazy val dependencies = Seq(
-  "org.typelevel" %% "cats-core" % "1.6.0",
-  "org.typelevel" %% "cats-effect" % "1.2.0",
-  "org.typelevel" %% "cats-mtl-core" % "0.4.0",
-  "com.twitter" %% "finagle-http" % "19.2.0",
-  "com.tethys-json" %% "tethys" % "0.9.0.1",
+  "org.typelevel" %% "cats-effect" % "3.1.0" cross(CrossVersion.for3Use2_13),
+  "com.twitter" %% "finagle-http" % "21.3.0" cross(CrossVersion.for3Use2_13),
+  "com.tethys-json" %% "tethys" % "0.21.0" cross(CrossVersion.for3Use2_13),
   "org.flywaydb" % "flyway-core" % "5.2.4",
   "org.postgresql" % "postgresql" % "42.1.4",
   "org.apache.commons" % "commons-dbcp2" % "2.6.0",
   "ch.qos.logback" % "logback-classic" % "1.2.3",
-  "me.scf37.config3" %% "config3" % "1.0.0"
+  "me.scf37" %% "config3" % "1.0.5" cross(CrossVersion.for3Use2_13)
 )
 
 lazy val testDependencies = Seq(
-  "org.scalatest" %% "scalatest" % "3.0.5",
-  "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.4"
+  "org.scalatest" %% "scalatest" % "3.2.8",
+  "org.testcontainers" % "postgresql" % "1.15.3"
 ).map(_ % "test")
 
 val fpscala2 = project.in(file("."))
@@ -46,5 +37,5 @@ val fpscala2 = project.in(file("."))
     .settings(libraryDependencies ++= dependencies)
     .settings(libraryDependencies ++= testDependencies)
 
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.7")
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+//addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.7")
+//addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
