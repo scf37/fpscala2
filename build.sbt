@@ -1,6 +1,6 @@
 
 val scalaSettings = Seq(
-  scalaVersion := "3.0.0-RC3",
+  scalaVersion := "3.0.0",
   scalacOptions ++= compilerOptions
 )
 
@@ -14,7 +14,7 @@ lazy val compilerOptions = Seq(
 )
 
 lazy val dependencies = Seq(
-  "org.typelevel" %% "cats-effect" % "3.1.0" cross(CrossVersion.for3Use2_13),
+  "org.typelevel" %% "cats-effect" % "3.1.1",
   "com.twitter" %% "finagle-http" % "21.3.0" cross(CrossVersion.for3Use2_13),
   "com.tethys-json" %% "tethys" % "0.21.0" cross(CrossVersion.for3Use2_13),
   "org.flywaydb" % "flyway-core" % "5.2.4",
@@ -25,7 +25,7 @@ lazy val dependencies = Seq(
 )
 
 lazy val testDependencies = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.8",
+  "org.scalatest" %% "scalatest" % "3.2.9",
   "org.testcontainers" % "postgresql" % "1.15.3"
 ).map(_ % "test")
 
